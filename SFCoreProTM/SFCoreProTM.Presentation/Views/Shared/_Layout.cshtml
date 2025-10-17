@@ -1,10 +1,32 @@
-﻿<!DOCTYPE html>
+﻿@inject SFCoreProTM.Presentation.Services.ViteManifestService ViteManifest
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - SFCoreProTM.Presentation</title>
     <script type="importmap"></script>
+@{
+        // 1. Dapatkan controller dan action saat ini
+        var controller = ViewContext.RouteData.Values["controller"]?.ToString();
+        var action = ViewContext.RouteData.Values["action"]?.ToString();
+
+        if (!string.IsNullOrEmpty(controller) && !string.IsNullOrEmpty(action))
+        {
+            // 2. Buat nama entry point yang cocok dengan manifest.json
+            var actionLower = action.ToLowerInvariant();
+            var entryPoint = $"views/{controller}/{actionLower}-main.js";
+            
+            // 3. Ambil semua path CSS yang dibutuhkan untuk entry point tersebut
+            var cssFiles = ViteManifest.GetCssPathsForEntry(entryPoint);
+
+            // 4. Render semua tag <link>
+            foreach (var cssFile in cssFiles)
+            {
+                <link rel="stylesheet" href="~/pages/@cssFile" />
+            }
+        }
+    }
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 </head>
 <body>
@@ -22,6 +44,6 @@
     </footer>
     <!-- Inject Vue script sesuai View name -->
      @await Html.PartialAsync("_InjectVueScript", ViewContext.RouteData.Values["controller"])
-    <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="~/pages/AppShell/index-main.js" asp-append-version="true"></script>
 </body>
 </html>

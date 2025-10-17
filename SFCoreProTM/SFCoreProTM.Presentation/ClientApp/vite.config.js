@@ -81,6 +81,7 @@ export default defineConfig({
     emptyOutDir: false, // false karena kita bersihin manual
     minify: 'esbuild',
     sourcemap: false,
+    manifest: true,
     rollupOptions: Object.keys(input).length > 0
       ? {
           input,

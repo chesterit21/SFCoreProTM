@@ -8,7 +8,7 @@
         </a>
         <div class="login-header-link">
           <span>New to Plane?</span>
-          <a class="login-link" href="#">Sign up</a>
+          <a class="login-link" href="/signup">Sign up</a>
         </div>
       </header>
 

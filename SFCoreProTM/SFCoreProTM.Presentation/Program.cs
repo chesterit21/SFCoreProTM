@@ -4,7 +4,7 @@ using SFCoreProTM.Persistence.Extensions;
 using SFCoreProTM.Presentation.Middlewares;
 using SFCoreProTM.Presentation.Extensions;
 using System;
-
+using SFCoreProTM.Presentation.Services;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllersWithViews();
@@ -14,7 +14,7 @@ builder.Services.AddFluentValidationAutoValidation();
 builder.Services.AddFluentValidationClientsideAdapters();
 builder.Services.AddJwtAuthentication(builder.Configuration);
 builder.Services.AddAutoMapper(_ => { }, AppDomain.CurrentDomain.GetAssemblies());
-
+builder.Services.AddSingleton<ViteManifestService>(); //
 var app = builder.Build();
 
 app.UseGlobalExceptionHandler();

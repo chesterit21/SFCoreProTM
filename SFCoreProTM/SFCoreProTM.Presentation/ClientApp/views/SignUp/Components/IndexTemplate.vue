@@ -8,7 +8,7 @@
         </a>
         <div class="signup-header-link">
           <span>Already have an account?</span>
-          <a class="signup-link" href="#">Sign in</a>
+          <a class="signup-link" href="/">Sign in</a>
         </div>
       </header>
 
@@ -43,6 +43,9 @@
           </div>
 
           <form class="signup-form" @submit.prevent="handleSubmit">
+            <div v-if="errorMessage" class="form-alert form-alert--error">
+              {{ errorMessage }}
+            </div>
             <div class="form-row">
               <div class="form-field">
                 <label for="full-name">Full name</label>
@@ -186,8 +189,9 @@
               We’ll keep you posted about product updates and best practices. You can unsubscribe anytime.
             </div>
 
-            <button type="submit" class="signup-submit" :disabled="!canSubmit">
-              Create workspace
+            <button type="submit" class="signup-submit" :disabled="isSubmitting || !canSubmit">
+              <span v-if="isSubmitting" class="button-spinner" aria-hidden="true" />
+              <span>{{ isSubmitting ? 'Creating workspace…' : 'Create workspace' }}</span>
             </button>
           </form>
         </section>
@@ -208,6 +212,7 @@
 
 <script setup>
 import { computed, reactive, ref } from 'vue'
+import authService from '@/services/authService'
 
 const fullName = ref('')
 const workspaceName = ref('')
@@ -217,6 +222,8 @@ const confirmPassword = ref('')
 const teamSize = ref('1-5')
 const acceptedTerms = ref(false)
 const showErrors = ref(false)
+const isSubmitting = ref(false)
+const errorMessage = ref('')
 
 const passwordVisibility = reactive({
   password: false,
@@ -257,15 +264,35 @@ const canSubmit = computed(
 
 const handleSubmit = () => {
   showErrors.value = !canSubmit.value
+  errorMessage.value = ''
 
-  if (!canSubmit.value) return
+  if (!canSubmit.value || isSubmitting.value) return
 
-  console.info('Submitting signup form with:', {
-    fullName: fullName.value,
-    workspaceName: workspaceName.value,
-    email: email.value,
+  const nameParts = fullName.value.trim().split(/\s+/)
+  const [firstName = '', ...rest] = nameParts
+  const payload = {
+    email: email.value.trim(),
+    password: password.value,
+    displayName: fullName.value.trim(),
+    firstName,
+    lastName: rest.join(' '),
+    workspaceName: workspaceName.value.trim(),
     teamSize: teamSize.value
-  })
+  }
+
+  isSubmitting.value = true
+
+  authService
+    .signUp(payload)
+    .then(() => {
+      window.location.href = '/'
+    })
+    .catch((error) => {
+      errorMessage.value = error?.message || 'Unable to create your account. Please try again.'
+    })
+    .finally(() => {
+      isSubmitting.value = false
+    })
 }
 </script>
 
@@ -568,6 +595,19 @@ const handleSubmit = () => {
   color: rgba(71, 85, 105, 0.85);
 }
 
+.form-alert {
+  padding: 12px 14px;
+  border-radius: 12px;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.form-alert--error {
+  background: rgba(248, 113, 113, 0.12);
+  color: #b91c1c;
+  border: 1px solid rgba(248, 113, 113, 0.35);
+}
+
 .signup-submit {
   height: 50px;
   border-radius: 14px;
@@ -589,6 +629,17 @@ const handleSubmit = () => {
   opacity: 0.65;
   cursor: not-allowed;
   box-shadow: none;
+}
+
+.signup-submit .button-spinner {
+  width: 18px;
+  height: 18px;
+  margin-right: 10px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.6);
+  border-top-color: #ffffff;
+  display: inline-block;
+  animation: spin 0.8s linear infinite;
 }
 
 .signup-footer {
@@ -692,6 +743,12 @@ const handleSubmit = () => {
 .input-error {
   border-color: rgba(239, 68, 68, 0.8) !important;
   box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.12) !important;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 @media (max-width: 1024px) {

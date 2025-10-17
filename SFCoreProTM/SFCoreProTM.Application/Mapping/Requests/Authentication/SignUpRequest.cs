@@ -21,7 +21,12 @@ public sealed class SignUpRequest
     [MaxLength(255)]
     public string? LastName { get; set; }
 
+    [MaxLength(255)]
+    public string? WorkspaceName { get; set; }
+
+    [MaxLength(64)]
+    public string? TeamSize { get; set; }
+
     // Optional invite token for invite-only flows
     public string? InviteToken { get; set; }
 }
-
