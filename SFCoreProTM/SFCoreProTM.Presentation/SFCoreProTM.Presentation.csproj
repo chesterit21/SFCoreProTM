@@ -1,0 +1,69 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\SFCoreProTM.Application\SFCoreProTM.Application.csproj" />
+    <ProjectReference Include="..\SFCoreProTM.Persistence\SFCoreProTM.Persistence.csproj" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <ClientAppDirectory>ClientApp</ClientAppDirectory>
+    <ClientAppFullPath>$(MSBuildProjectDirectory)/$(ClientAppDirectory)</ClientAppFullPath>
+    <NpmCommand Condition="'$(NpmCommand)' == '' and '$(OS)' == 'Windows_NT'">npm.cmd</NpmCommand>
+    <NpmCommand Condition="'$(NpmCommand)' == '' and '$(OS)' != 'Windows_NT'">npm</NpmCommand>
+    <NodeModulesStampFile>$(ClientAppFullPath)/node_modules/.msbuild-stamp</NodeModulesStampFile>
+    <ViteOutputStampFile>$(MSBuildProjectDirectory)/wwwroot/pages/.msbuild-vite</ViteOutputStampFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="11.0.0" />
+    <PackageReference Include="FluentValidation.AspNetCore" Version="11.3.1" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="9.0.10" />
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4" />
+    <PackageReference Include="AutoMapper" Version="15.0.1" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.10" />
+    <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="8.0.1" />
+
+  </ItemGroup>
+
+  <ItemGroup>
+    <ClientAppRestoreInputs Include="$(ClientAppDirectory)/package.json" />
+    <ClientAppRestoreInputs Include="$(ClientAppDirectory)/package-lock.json" Condition="Exists('$(ClientAppDirectory)/package-lock.json')" />
+    <ClientAppRestoreInputs Include="$(ClientAppDirectory)/pnpm-lock.yaml" Condition="Exists('$(ClientAppDirectory)/pnpm-lock.yaml')" />
+    <ClientAppRestoreInputs Include="$(ClientAppDirectory)/yarn.lock" Condition="Exists('$(ClientAppDirectory)/yarn.lock')" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ClientAppBuildInputs Include="$(ClientAppDirectory)/vite.config.js" Condition="Exists('$(ClientAppDirectory)/vite.config.js')" />
+    <ClientAppBuildInputs Include="$(ClientAppDirectory)/bootstrapVueApp.js" Condition="Exists('$(ClientAppDirectory)/bootstrapVueApp.js')" />
+    <ClientAppBuildInputs Include="$(ClientAppDirectory)/index.html" Condition="Exists('$(ClientAppDirectory)/index.html')" />
+    <ClientAppBuildInputs Include="$(ClientAppDirectory)/views/**/*.*" Condition="Exists('$(ClientAppDirectory)/views')" />
+    <ClientAppBuildInputs Include="$(ClientAppDirectory)/components/**/*.*" Condition="Exists('$(ClientAppDirectory)/components')" />
+    <ClientAppBuildInputs Include="$(ClientAppDirectory)/core/**/*.*" Condition="Exists('$(ClientAppDirectory)/core')" />
+    <ClientAppBuildInputs Include="$(ClientAppDirectory)/plugins/**/*.*" Condition="Exists('$(ClientAppDirectory)/plugins')" />
+    <ClientAppBuildInputs Include="$(ClientAppDirectory)/services/**/*.*" Condition="Exists('$(ClientAppDirectory)/services')" />
+    <ClientAppBuildInputs Include="$(ClientAppDirectory)/src/**/*.*" Condition="Exists('$(ClientAppDirectory)/src')" />
+    <ClientAppBuildInputs Include="$(ClientAppDirectory)/public/**/*.*" Condition="Exists('$(ClientAppDirectory)/public')" />
+  </ItemGroup>
+
+  <!-- Trigger the Vite build whenever the ASP.NET Core project is built or published -->
+  <Target Name="EnsureClientAppDependencies"
+          Inputs="@(ClientAppRestoreInputs)"
+          Outputs="$(NodeModulesStampFile)"
+          Condition="Exists('$(ClientAppDirectory)/package.json')">
+    <Message Importance="high" Text="Restoring npm packages in $(ClientAppDirectory)..." />
+    <Exec Command="npm install" WorkingDirectory="ClientApp" />
+    <MakeDir Directories="$([System.IO.Path]::GetDirectoryName('$(NodeModulesStampFile)'))" />
+    <Touch Files="$(NodeModulesStampFile)" AlwaysCreate="true" />
+  </Target>
+
+  <Target Name="BuildClientApp" AfterTargets="Build">
+    <Exec WorkingDirectory="ClientApp" Command="npm run build"/>
+  </Target>
+
+</Project>

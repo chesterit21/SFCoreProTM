@@ -1,0 +1,29 @@
+# git ls-files --others --exclude-from=.git/info/exclude
+# Lines that start with '#' are comments.
+# For a project mostly in C, the following would be a good set of
+# exclude patterns (uncomment them if you want to use them):
+# *.[oa]
+# *~
+/plane
+/SFCoreProTM/SFCoreProTM.Application/obj
+/SFCoreProTM/SFCoreProTM.Architecture.Rules/obj
+/SFCoreProTM/SFCoreProTM.Domain/obj
+/SFCoreProTM/SFCoreProTM.Persistence/obj
+/SFCoreProTM/SFCoreProTM.Presentation/obj
+/SFCoreProTM/SFCoreProTM.Shared/obj
+
+/SFCoreProTM/SFCoreProTM.Application/bin
+/SFCoreProTM/SFCoreProTM.Architecture.Rules/bin
+/SFCoreProTM/SFCoreProTM.Domain/bin
+/SFCoreProTM/SFCoreProTM.Persistence/bin
+/SFCoreProTM/SFCoreProTM.Presentation/bin
+/SFCoreProTM/SFCoreProTM.Shared/bin
+
+/SFCoreProTM/SFCoreProTM.Application/bin/Debug/net10.0
+/SFCoreProTM/SFCoreProTM.Architecture.Rules/bin/Debug/net10.0
+/SFCoreProTM/SFCoreProTM.Domain/bin/Debug/net10.0
+/SFCoreProTM/SFCoreProTM.Persistence/bin/Debug/net10.0
+/SFCoreProTM/SFCoreProTM.Presentation/bin/Debug/net10.0
+/SFCoreProTM/SFCoreProTM.Shared/bin/Debug/net10.0
+/SFCoreProTM/SFCoreProTM.Presentation/wwwroot/pages
+/SFCoreProTM/SFCoreProTM.Presentation/wwwroot/lib

@@ -1,0 +1,44 @@
+@{ Layout = null; }
+@inject Microsoft.AspNetCore.Hosting.IWebHostEnvironment Env
+@using System.IO
+@using Microsoft.Extensions.Hosting
+
+@{
+    var controller = ViewContext.RouteData.Values["controller"]?.ToString();
+    var action = ViewContext.RouteData.Values["action"]?.ToString();
+    var scriptFileName = $"{action?.ToLowerInvariant()}-main.js";
+
+    var vueScriptPath = $"/pages/{controller}/{scriptFileName}";
+    var physicalPath = System.IO.Path.Combine(Env.WebRootPath, "pages", controller ?? "", scriptFileName);
+
+    var isDev = Env.IsDevelopment();
+    var fileExists = System.IO.File.Exists(physicalPath);
+}
+
+@if (!string.IsNullOrEmpty(controller) && !string.IsNullOrEmpty(action))
+{
+    if (!fileExists)
+    {
+        if (isDev)
+        {
+            <div style="color:red;font-weight:bold;">
+                ⚠️ Vue script '@scriptFileName' for action '@action' not found in controller '@controller'
+            </div>
+        }
+
+        <script>
+            console.error("Missing Vue script: @vueScriptPath");
+        </script>
+    }
+    else
+    {
+        <script type="module" src="@vueScriptPath" asp-append-version="true" defer></script>
+    }
+}
+
+@if (isDev)
+{
+    <div class="dev-mode-banner">
+        Mode: Development | @DateTime.Now.ToString("HH:mm:ss")
+    </div>
+}
