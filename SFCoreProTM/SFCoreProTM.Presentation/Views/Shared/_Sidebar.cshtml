@@ -1,0 +1,81 @@
+@* Views/Shared/_Sidebar.cshtml *@
+@{
+    // Data sidebar (sesuaikan dengan sumber data Anda nanti)
+    var sidebarSections = new List<dynamic> {
+        new {
+            id = "navigation",
+            label = "Navigasi Utama",
+            items = new List<dynamic> {
+                new { id = "overview", label = "Overview", icon = "fas fa-home", caption = "Statistik terkini", badge = 0, route = "/dashboard" },
+                new { id = "task-board", label = "Task Board", icon = "fas fa-tasks", caption = "Monitor tugas aktif", badge = 12, route = "/dashboard/taskboard" },
+                new { id = "sprint", label = "Sprint Plan", icon = "fas fa-flag", caption = "Rencana mingguan", badge = 0, route = "/dashboard/sprintplan" },
+                new { id = "backlog", label = "Backlog", icon = "fas fa-layer-group", caption = "Daftar pekerjaan", badge = 0, route = "/dashboard/backlog" }
+            }
+        },
+        new {
+            id = "reports",
+            label = "Laporan",
+            items = new List<dynamic> {
+                new { id = "burn-down", label = "Burn Down", icon = "fas fa-hourglass-half", caption = "Progress sprint", badge = 0, route = "/dashboard/burndown" },
+                new { id = "team-capacity", label = "Team Capacity", icon = "fas fa-users", caption = "Analisa kapasitas", badge = 0, route = "/dashboard/teamcapacity" },
+                new { id = "release", label = "Release", icon = "fas fa-arrow-up", caption = "Status rilis", badge = 2, route = "/dashboard/release" }
+            }
+        }
+    };
+
+    // TODO: Dapatkan ID menu sidebar aktif dari ViewData atau Context
+    var activeSidebarMenuId = ViewData["ActiveSidebarMenuId"] as string ?? "overview"; // Default ke overview
+
+    // TODO: Dapatkan nama pengguna dari data pengguna/sesi
+    var userName = "Jane";
+}
+
+<aside class="d-flex flex-column gap-3 vh-100 p-3 bg-light" style="width: 320px; box-shadow: 0 18px 32px -26px rgba(15, 23, 42, 0.4);">
+
+    @* Profile Section *@
+    <section class="p-3 rounded text-white" style="background: linear-gradient(145deg, #1d4ed8 0%, #7c3aed 100%); box-shadow: 0 18px 32px -24px rgba(30, 64, 175, 0.55); border-radius: 20px;">
+        <p class="mb-1 fw-bold">Halo, @userName!</p>
+        <p class="small mb-2" style="color: rgba(248, 250, 252, 0.85);">Kelola seluruh aktivitas tim Anda dari sini.</p>
+        <button type="button" class="btn btn-sm mt-2" style="background: rgba(15, 23, 42, 0.2); color: inherit; border-radius: 12px;">Lihat Profil</button>
+    </section>
+
+    @* Menu Sections *@
+    @foreach (var sideInfo in sidebarSections)
+    {
+        <section class="p-3 bg-white rounded" style="border-radius: 20px; box-shadow: 0 18px 32px -26px rgba(15, 23, 42, 0.4);">
+            <p class="mb-2 fw-bold small text-muted text-uppercase letter-spacing-1">@sideInfo.label</p>
+            <ul class="nav nav-pills flex-column mb-auto">
+                @foreach (var item in sideInfo.items)
+                {
+                    var isActive = item.id == activeSidebarMenuId;
+                    <li class="nav-item">
+                        <a href="@item.route" class="nav-link d-flex align-items-center gap-2 py-2 px-3 @(isActive ? "active" : "text-dark")" style="border-radius: 14px; transition: background 0.2s ease, color 0.2s ease;">
+                            <i class="@item.icon fa-fw me-1" style="width: 20px; text-align:center;"></i>
+                            <div class="d-flex flex-column flex-grow-1">
+                                <span class="fw-semibold">@item.label</span>
+                                @if (!string.IsNullOrEmpty(item.caption))
+                                {
+                                    <small style="font-size: 0.78rem; color: #6b7280;">@item.caption</small>
+                                }
+                            </div>
+                            @if (item.badge > 0)
+                            {
+                                <span class="badge rounded-pill ms-auto" style="background: rgba(37, 99, 235, 0.18); color: #1d4ed8; font-weight: 600;">@item.badge</span>
+                            }
+                        </a>
+                    </li>
+                }
+            </ul>
+        </section>
+    }
+
+    @* Footer Section *@
+    <section class="mt-auto p-3" style="border-radius: 20px;">
+         <div class="p-3 rounded text-white" style="background: #111827; border-radius: 16px;">
+            <p class="mb-1 fw-bold">Bantuan Cepat</p>
+            <p class="small mb-2" style="color: rgba(248, 250, 252, 0.76);">Hubungi tim support atau lihat dokumentasi internal.</p>
+            <button type="button" class="btn btn-sm mt-1 fw-semibold text-dark" style="background: #facc15; border-radius: 12px;">Hubungi Kami</button>
+        </div>
+    </section>
+
+</aside>

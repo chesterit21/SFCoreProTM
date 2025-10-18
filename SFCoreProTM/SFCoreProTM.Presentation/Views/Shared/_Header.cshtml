@@ -1,0 +1,75 @@
+@* Views/Shared/_Header.cshtml *@
+@using System.Globalization
+
+@{
+    // Data menu aplikasi (sesuaikan dengan sumber data Anda nanti)
+    var applicationMenu = new List<dynamic> {
+        new { id = "projects", label = "Projects", route = "/projectsMenu" },
+        new { id = "issues", label = "Issue Tracker", route = "/issuesMenu" },
+        new { id = "resources", label = "Resources", route = "/resources" },
+        new { id = "teams", label = "Teams", route = "/teams" }
+    };
+
+    // TODO: Dapatkan ID menu aktif dari ViewData atau Context
+    var activeApplicationMenuId = ViewData["ActiveMenuId"] as string ?? "dashboard"; // Default ke dashboard jika tidak ada
+
+    // TODO: Dapatkan nama workspace dari data pengguna/sesi
+    var workspaceName = "SFCore Workspace";
+    var todaysDate = DateTime.Now.ToString("dddd, dd MMMM yyyy", new CultureInfo("id-ID"));
+
+    // TODO: Dapatkan inisial pengguna dari data pengguna/sesi
+    var userInitials = "JD";
+}
+
+<nav class="navbar navbar-expand-lg navbar-dark" style="background: linear-gradient(135deg, rgba(15, 76, 129, 0.95) 0%, rgba(37, 99, 235, 0.85) 100%); box-shadow: 0 12px 24px -18px rgba(15, 23, 42, 0.4);">
+    <div class="container-fluid px-4">
+        @* Brand/Logo Section *@
+        <a class="navbar-brand d-flex align-items-center me-4" href="#">
+            <div class="d-inline-flex align-items-center justify-content-center me-3" style="width: 52px; height: 52px; border-radius: 16px; background: rgba(15, 23, 42, 0.35); font-weight: 700; font-size: 1.25rem;">
+                SF
+            </div>
+            <div>
+                <div style="font-size: 1.125rem; font-weight: 700;">@workspaceName</div>
+                <small style="color: rgba(248, 250, 252, 0.78);">@todaysDate</small>
+            </div>
+        </a>
+
+        @* Application Menu (Center) *@
+        <div class="collapse navbar-collapse justify-content-center" id="navbarNav">
+            <ul class="navbar-nav rounded-pill px-2" style="background: rgba(15, 23, 42, 0.16);">
+                @foreach (var menu in applicationMenu)
+                {
+                    var isActive = menu.id == activeApplicationMenuId;
+                    <li class="nav-item">
+                        <a class="nav-link rounded-pill px-3 py-2 @(isActive ? "active" : "")"
+                           style="color: rgba(248, 250, 252, 0.78); font-weight: 600; @(isActive ? "background: rgba(248, 250, 252, 0.18); color: #fff; box-shadow: 0 10px 24px -14px rgba(15, 23, 42, 0.65);" : "")"
+                           href="@menu.route">
+                            @menu.label
+                        </a>
+                    </li>
+                }
+            </ul>
+        </div>
+
+        @* Actions (Right) *@
+        <div class="d-flex align-items-center ms-auto">
+            <form class="d-flex me-3">
+                <div class="input-group input-group-sm rounded-pill" style="background: rgba(15, 23, 42, 0.18); border: none;">
+                    <span class="input-group-text border-0 bg-transparent" style="color: rgba(248, 250, 252, 0.78);"><i class="fas fa-search"></i></span>
+                    <input class="form-control form-control-sm border-0 bg-transparent shadow-none" type="search" placeholder="Cari proyek atau tugas" aria-label="Search" style="color: rgba(248, 250, 252, 0.78); width: 180px;">
+                </div>
+            </form>
+            <button type="button" class="btn btn-sm me-3 fw-semibold text-dark shadow-sm" style="background-color: #facc15; border-radius: 12px;">
+                Buat Task
+            </button>
+            <div class="d-flex align-items-center justify-content-center fw-bold" style="width: 40px; height: 40px; border-radius: 12px; background: rgba(15, 23, 42, 0.25);">
+                @userInitials
+            </div>
+        </div>
+
+        @* Mobile Toggler (optional) *@
+        <button class="navbar-toggler ms-3" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+    </div>
+</nav>
