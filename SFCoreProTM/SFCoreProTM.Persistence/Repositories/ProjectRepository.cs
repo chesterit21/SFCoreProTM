@@ -31,4 +31,9 @@ public sealed class ProjectRepository : IProjectRepository
         await _context.ProjectMembers.AddRangeAsync(members, cancellationToken);
         await _context.IssueUserProperties.AddRangeAsync(issueUserProperties, cancellationToken);
     }
+
+    public Task<IReadOnlyCollection<Project>> ListByWorkspaceAsync(Guid workspaceId, CancellationToken cancellationToken = default)
+    {
+        throw new NotImplementedException();
+    }
 }

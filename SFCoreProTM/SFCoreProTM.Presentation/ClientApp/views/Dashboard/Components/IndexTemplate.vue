@@ -112,8 +112,7 @@
               <div
                 v-for="activity in filteredActivities"
                 :key="activity.id"
-                class="activity-card"
-              >
+                class="activity-card">
                 <div class="activity-card__status" :style="{ backgroundColor: activity.color }" />
                 <div class="activity-card__meta">
                   <p class="activity-card__title">{{ activity.title }}</p>
