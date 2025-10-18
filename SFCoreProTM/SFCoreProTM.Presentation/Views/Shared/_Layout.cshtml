@@ -44,6 +44,6 @@
     </footer>
     <!-- Inject Vue script sesuai View name -->
      @await Html.PartialAsync("_InjectVueScript", ViewContext.RouteData.Values["controller"])
-    <script src="~/pages/AppShell/index-main.js" asp-append-version="true"></script>
+    @* <script type="module" src="~/pages/AppShell/index-main.js" asp-append-version="true"></script> *@
 </body>
 </html>

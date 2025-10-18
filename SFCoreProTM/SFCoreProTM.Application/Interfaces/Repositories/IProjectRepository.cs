@@ -9,6 +9,8 @@ namespace SFCoreProTM.Application.Interfaces.Repositories;
 
 public interface IProjectRepository
 {
+    Task<IReadOnlyCollection<Project>> ListByWorkspaceAsync(Guid workspaceId, CancellationToken cancellationToken = default);
+
     Task AddAsync(
         Project project,
         IEnumerable<State> states,

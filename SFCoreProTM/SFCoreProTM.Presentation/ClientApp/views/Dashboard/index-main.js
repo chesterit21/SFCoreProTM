@@ -1,0 +1,5 @@
+//  ClientApp/views/Dashboard/index-main.js
+
+import { bootstrapVueApp } from '@/bootstrapVueApp'
+import IndexTemplate from './Components/IndexTemplate.vue'
+bootstrapVueApp(IndexTemplate)

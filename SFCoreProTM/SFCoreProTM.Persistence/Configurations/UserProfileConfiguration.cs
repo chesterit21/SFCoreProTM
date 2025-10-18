@@ -17,7 +17,8 @@ namespace SFCoreProTM.Persistence.Configurations
 
             var themeProperty = builder.Property(p => p.Theme)
                 .HasConversion(ValueConverters.StructuredDataConverter)
-                .HasColumnType("jsonb");
+                .HasColumnType("jsonb")
+                .IsRequired(false);
             themeProperty.Metadata.SetValueComparer(ValueConverters.StructuredDataComparer);
 
             builder.Property(p => p.IsAppRailDocked);

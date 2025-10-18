@@ -11,6 +11,36 @@ public class DashboardController : Controller
         return View();
     }
 
+    public IActionResult TaskBoard()
+    {
+        return View();
+    }
+
+    public IActionResult SprintPlan()
+    {
+        return View();
+    }
+
+    public IActionResult Backlog()
+    {
+        return View();
+    }
+
+    public IActionResult BurnDown()
+    {
+        return View();
+    }
+
+    public IActionResult TeamCapacity()
+    {
+        return View();
+    }
+
+    public IActionResult Release()
+    {
+        return View();
+    }
+
 
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
     public IActionResult Error()

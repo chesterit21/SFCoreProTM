@@ -22,9 +22,11 @@ public sealed class UserRepository : IUserRepository
     {
         ArgumentNullException.ThrowIfNull(email);
 
-        return _context.Users.SingleOrDefaultAsync(
-            user => EF.Property<string?>(user, nameof(User.Email)) == email.Value,
-            cancellationToken);
+        var providerEmail = ValueConverters.EmailAddressConverter.ConvertToProvider(email);
+
+        return _context.Users
+            .FromSqlInterpolated($"SELECT * FROM users WHERE email = {providerEmail} LIMIT 1")
+            .SingleOrDefaultAsync(cancellationToken);
     }
 
     public Task<User?> GetByIdAsync(Guid userId, CancellationToken cancellationToken)
