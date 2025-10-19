@@ -1,6 +1,7 @@
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using SFCoreProTM.Application.Interfaces.Security;
+using SFCoreProTM.Application.Features.Projects.Queries.GetProjectById;
 
 namespace SFCoreProTM.Presentation.Controllers;
 
@@ -48,6 +49,7 @@ public class ProjectsMenuController : Controller
             return View(new List<SFCoreProTM.Application.DTOs.Projects.ProjectSummaryDto>());
         }
     }
+    
     // Action BARU untuk menampilkan form Create Project
     [HttpGet]
     public IActionResult Create()
@@ -61,5 +63,24 @@ public class ProjectsMenuController : Controller
         // Gunakan DTO atau Request object sebagai model jika perlu pre-fill
         var model = new SFCoreProTM.Application.Mapping.Requests.Projects.CreateProjectRequest();
         return View(model); // Akan mencari Views/ProjectsMenu/Create.cshtml
+    }
+    
+    // Action untuk menampilkan form Edit Project
+    [HttpGet]
+    public async Task<IActionResult> Edit(Guid id)
+    {
+        // Kirim workspaceId dan projectId ke view agar bisa digunakan oleh JavaScript
+        ViewData["WorkspaceId"] = _currentUserService.WorkspaceId;
+        ViewData["ProjectId"] = id;
+
+        return View(); // Akan mencari Views/ProjectsMenu/Edit.cshtml
+    }
+    
+    // Action untuk redirect ke ModuleView
+    [HttpGet]
+    public IActionResult Modules(Guid id)
+    {
+        // id adalah projectId
+        return RedirectToAction("Index", "ModuleView", new { projectId = id });
     }
 }

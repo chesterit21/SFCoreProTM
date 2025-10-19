@@ -4,10 +4,10 @@
 @{
     // Data menu aplikasi (sesuaikan dengan sumber data Anda nanti)
     var applicationMenu = new List<dynamic> {
-        new { id = "projects", label = "Projects", route = "/projectsMenu" },
+        @* new { id = "projects", label = "Projects", route = "/projectsMenu" },
         new { id = "issues", label = "Issue Tracker", route = "/issuesMenu" },
         new { id = "resources", label = "Resources", route = "/resources" },
-        new { id = "teams", label = "Teams", route = "/teams" }
+        new { id = "teams", label = "Teams", route = "/teams" } *@
     };
 
     // TODO: Dapatkan ID menu aktif dari ViewData atau Context
@@ -18,13 +18,13 @@
     var todaysDate = DateTime.Now.ToString("dddd, dd MMMM yyyy", new CultureInfo("id-ID"));
 
     // TODO: Dapatkan inisial pengguna dari data pengguna/sesi
-    var userInitials = "JD";
+    var userInitials = "SF";
 }
 
 <nav class="navbar navbar-expand-lg navbar-dark" style="background: linear-gradient(135deg, rgba(15, 76, 129, 0.95) 0%, rgba(37, 99, 235, 0.85) 100%); box-shadow: 0 12px 24px -18px rgba(15, 23, 42, 0.4);">
     <div class="container-fluid px-4">
         @* Brand/Logo Section *@
-        <a class="navbar-brand d-flex align-items-center me-4" href="#">
+        <a class="navbar-brand d-flex align-items-center me-4" href="/">
             <div class="d-inline-flex align-items-center justify-content-center me-3" style="width: 52px; height: 52px; border-radius: 16px; background: rgba(15, 23, 42, 0.35); font-weight: 700; font-size: 1.25rem;">
                 SF
             </div>
@@ -59,11 +59,30 @@
                     <input class="form-control form-control-sm border-0 bg-transparent shadow-none" type="search" placeholder="Cari proyek atau tugas" aria-label="Search" style="color: rgba(248, 250, 252, 0.78); width: 180px;">
                 </div>
             </form>
-            <button type="button" class="btn btn-sm me-3 fw-semibold text-dark shadow-sm" style="background-color: #facc15; border-radius: 12px;">
-                Buat Task
-            </button>
-            <div class="d-flex align-items-center justify-content-center fw-bold" style="width: 40px; height: 40px; border-radius: 12px; background: rgba(15, 23, 42, 0.25);">
-                @userInitials
+            <a type="button" asp-controller="ProjectsMenu" asp-action="Index" class="btn btn-sm me-3 fw-semibold shadow-sm" style="background-color: #222220; border-radius: 12px;color:rgb(231, 231, 231);padding-left:8px;padding-right:8px;">
+                Proyek
+            </a>
+            <a type="button" asp-controller="ProjectsMenu" asp-action="Create" class="btn btn-sm me-3 fw-semibold text-dark shadow-sm" style="background-color: #facc15; border-radius: 12px;">
+                Buat Proyek
+            </a>
+            <div class="dropdown">
+                <button class="btn dropdown-toggle d-flex align-items-center justify-content-center fw-bold" 
+                        style="width: 40px; height: 40px; border-radius: 12px; background: rgba(15, 23, 42, 0.25);"
+                        type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                    @userInitials
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                    <li><a class="dropdown-item" href="#"><i class="fas fa-user me-2"></i>Profil</a></li>
+                    <li><a class="dropdown-item" href="#"><i class="fas fa-cog me-2"></i>Pengaturan</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li>
+                        <form id="logoutForm" method="post" action="/api/auth/logout">
+                            <button type="submit" class="dropdown-item">
+                                <i class="fas fa-sign-out-alt me-2"></i>Logout
+                            </button>
+                        </form>
+                    </li>
+                </ul>
             </div>
         </div>
 
@@ -73,3 +92,34 @@
         </button>
     </div>
 </nav>
+
+<script>
+document.getElementById('logoutForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    fetch('/api/auth/logout', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        credentials: 'same-origin'
+    })
+    .then(response => {
+        if (response.ok) {
+            // Hapus cookie secara manual jika diperlukan
+            document.cookie = '@(ViewData["JwtCookieName"] ?? "auth_token")=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+            
+            // Redirect ke halaman login
+            window.location.href = '/Home/Login';
+        } else {
+            console.error('Logout failed');
+        }
+    })
+    .catch(error => {
+        console.error('Error during logout:', error);
+        // Tetap redirect ke halaman login meskipun ada error
+        window.location.href = '/Home/Login';
+    });
+});
+</script>

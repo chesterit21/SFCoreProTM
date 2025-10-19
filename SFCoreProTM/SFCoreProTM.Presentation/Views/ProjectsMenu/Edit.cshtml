@@ -3,13 +3,14 @@
     Layout = "~/Views/Shared/_LayoutApp.cshtml"; 
     var workspaceId = ViewData["WorkspaceId"] as Guid?;
     var projectId = ViewData["ProjectId"] as Guid?;
+    ViewData["ActiveMenuId"] = "projects";
 }
 
 <h2>Edit Project</h2>
 <hr />
 
 <div class="row">
-    <div class="col-md-8">
+    <div class="col-md-12">
         <form id="editProjectForm">
             @Html.AntiForgeryToken()
 
@@ -24,8 +25,7 @@
 
             <div class="mb-3">
                 <label for="projectDescription" class="form-label fw-semibold">Description</label>
-                <div id="projectDescriptionEditor" class="border rounded"></div>
-                <input type="hidden" id="projectDescription" name="DescriptionPlainText" />
+                <textarea class="form-control" id="projectDescription" name="DescriptionPlainText" rows="25"></textarea>
             </div>
 
             <div class="mt-4">
@@ -33,24 +33,14 @@
                     <span id="submitSpinner" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
                     Update Project
                 </button>
-                <a asp-controller="ProjectView" asp-action="Index" asp-route-workspaceId="@workspaceId" class="btn btn-secondary ms-2">Cancel</a>
+                <a asp-controller="ProjectsMenu" asp-action="Index" asp-route-workspaceId="@workspaceId" class="btn btn-secondary ms-2">Cancel</a>
             </div>
         </form>
     </div>
 </div>
 
-@section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
-    <script src="https://cdn.jsdelivr.net/npm/@("@")editorjs/editorjs@latest"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@("@")editorjs/header@latest"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@("@")editorjs/list@latest"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@("@")editorjs/paragraph@latest"></script>
-    <script type="module">
-        import { initializeEditor, getEditorPlainText } from '/js/editor.js';
-        
-        // Inisialisasi Editor.js
-        let editor;
-
+@section Scripts {    
+    <script>
         // Helper untuk mendapatkan CSRF token dari form
         function getAntiForgeryToken() {
             const tokenInput = document.querySelector('input[name="__RequestVerificationToken"]');
@@ -73,18 +63,7 @@
                 
                 const project = await response.json();
                 document.getElementById('projectName').value = project.name;
-                
-                // Inisialisasi editor dengan konten yang ada
-                editor = initializeEditor('projectDescriptionEditor', {
-                    blocks: [
-                        {
-                            type: "paragraph",
-                            data: {
-                                text: project.description || ""
-                            }
-                        }
-                    ]
-                });
+                document.getElementById('projectDescription').value = project.description || "";
             } catch (error) {
                 console.error("Error loading project data:", error);
                 const errorAlert = document.getElementById('formErrorAlert');
@@ -99,16 +78,9 @@
         const submitSpinner = document.getElementById('submitSpinner');
         const errorAlert = document.getElementById('formErrorAlert');
         const successAlert = document.getElementById('formSuccessAlert');
-        const descriptionInput = document.getElementById('projectDescription');
 
         form.addEventListener('submit', async function(event) {
             event.preventDefault(); // Mencegah submit standar HTML
-
-            // Simpan konten editor ke input tersembunyi
-            if (editor) {
-                const plainText = await getEditorPlainText(editor);
-                descriptionInput.value = plainText;
-            }
 
             // Reset alert
             errorAlert.classList.add('d-none');
@@ -153,7 +125,7 @@
                     successAlert.classList.remove('d-none');
                     // Redirect setelah beberapa detik
                     setTimeout(() => {
-                        window.location.href = `/workspaces/${'@workspaceId'}/projects`;
+                        window.location.href = `/projects`;
                     }, 2000);
                 } else {
                     const errorData = await response.json();

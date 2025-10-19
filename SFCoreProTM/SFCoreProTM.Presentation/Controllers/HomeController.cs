@@ -7,12 +7,27 @@ namespace SFCoreProTM.Presentation.Controllers;
 public class HomeController : Controller
 {
     public IActionResult Index()
-    {
+    {        // Jika pengguna sudah login, redirect ke dashboard
+        if (User.Identity.IsAuthenticated)
+        {
+            return RedirectToAction("Index", "Dashboard");
+        }
         return View();
     }
 
     public IActionResult Privacy()
     {
+        return View();
+    }
+
+    public IActionResult Login()
+    {
+        // Jika pengguna sudah login, redirect ke dashboard
+        if (User.Identity.IsAuthenticated)
+        {
+            return RedirectToAction("Index", "Dashboard");
+        }
+        
         return View();
     }
 

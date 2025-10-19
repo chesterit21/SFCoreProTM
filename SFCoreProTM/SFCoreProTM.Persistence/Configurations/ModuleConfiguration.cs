@@ -14,7 +14,7 @@ namespace SFCoreProTM.Persistence.Configurations
             builder.Property(module => module.WorkspaceId).IsRequired();
             builder.Property(module => module.ProjectId).IsRequired();
             builder.Property(module => module.Name).HasMaxLength(255).IsRequired();
-            builder.Property(module => module.Description).HasMaxLength(1000).IsRequired();
+            builder.Property(module => module.Description).IsRequired();
             builder.Property(module => module.SortOrder).IsRequired();
             builder.Property(module => module.Status).IsRequired();
         }

@@ -15,8 +15,7 @@
     
     <div class="mb-3">
         <label for="description" class="form-label">Description</label>
-        <div id="editModuleDescriptionEditor" class="border rounded" style="min-height: 150px;"></div>
-        <input type="hidden" id="description" name="description" />
+        <textarea class="form-control" id="description" name="description" rows="4"></textarea>
     </div>
     
     <div class="mb-3">
@@ -29,75 +28,3 @@
         <button type="submit" class="btn btn-primary" id="editModuleSubmitBtn">Update</button>
     </div>
 </form>
-
-<script src="https://cdn.jsdelivr.net/npm/@("@")editorjs/editorjs@latest"></script>
-<script src="https://cdn.jsdelivr.net/npm/@("@")editorjs/header@latest"></script>
-<script src="https://cdn.jsdelivr.net/npm/@("@")editorjs/list@latest"></script>
-<script src="https://cdn.jsdelivr.net/npm/@("@")editorjs/paragraph@latest"></script>
-<script type="module">
-    import { initializeEditor, getEditorPlainText } from '/js/editor.js';
-    
-    let editModuleEditor;
-    
-    // Load module data when modal is shown
-    $(document).ready(function() {
-        const moduleId = $('#moduleId').val();
-        
-        $.get(`/api/projects/${'@projectId'}/modules`, function(data) {
-            const module = data.find(m => m.id === moduleId);
-            if (module) {
-                $('#name').val(module.name);
-                $('#sortOrder').val(module.sortOrder);
-                $('#workspaceId').val(module.workspaceId);
-                
-                // Inisialisasi editor dengan konten yang ada
-                editModuleEditor = initializeEditor('editModuleDescriptionEditor', {
-                    blocks: [
-                        {
-                            type: "paragraph",
-                            data: {
-                                text: module.description || ""
-                            }
-                        }
-                    ]
-                });
-            }
-        });
-    });
-    
-    $('#editModuleForm').submit(async function(e) {
-        e.preventDefault();
-        
-        // Simpan konten editor ke input tersembunyi
-        if (editModuleEditor) {
-            const plainText = await getEditorPlainText(editModuleEditor);
-            $('#description').val(plainText);
-        }
-        
-        const formData = {
-            projectId: $('#projectId').val(),
-            moduleId: $('#moduleId').val(),
-            workspaceId: $('#workspaceId').val(),
-            name: $('#name').val(),
-            description: $('#description').val(),
-            sortOrder: parseInt($('#sortOrder').val())
-        };
-        
-        $.ajax({
-            url: `/api/projects/${formData.projectId}/modules/${formData.moduleId}`,
-            type: 'PUT',
-            contentType: 'application/json',
-            data: JSON.stringify(formData),
-            success: function(result) {
-                // Close modal
-                $('#editModuleModal').modal('hide');
-                
-                // Reload modules
-                loadModules();
-            },
-            error: function(xhr, status, error) {
-                alert('Error updating module: ' + xhr.responseText);
-            }
-        });
-    });
-</script>

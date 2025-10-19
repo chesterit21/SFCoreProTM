@@ -2,33 +2,30 @@
     ViewData["Title"] = "Modules";
     Layout = "~/Views/Shared/_LayoutApp.cshtml";
     var projectId = ViewBag.ProjectId as Guid?;
+    var projectName = ViewBag.ProjectName as string ?? "Project";
 }
 
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-header">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <h3 class="card-title">Modules</h3>
-                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createModuleModal" id="createModuleBtn">
-                            <i class="fas fa-plus"></i> Create Module
-                        </button>
-                    </div>
-                </div>
-                <div class="card-body">
-                    <div id="modulesList">
-                        <!-- Modules will be loaded here by JavaScript -->
-                    </div>
-                </div>
-            </div>
-        </div>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h3 class="card-title mb-0">Modules</h3>
+        <p class="text-muted mb-0">Project: @projectName</p>
     </div>
+    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createModuleModal"
+        id="createModuleBtn">
+        <i class="fas fa-plus"></i> Create Module
+    </button>
+</div>
+
+<hr />
+
+<div id="modulesList">
+    <!-- Modules will be loaded here by JavaScript -->
 </div>
 
 <!-- Create Modal -->
-<div class="modal fade" id="createModuleModal" tabindex="-1" aria-labelledby="createModuleModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
+<div class="modal fade" id="createModuleModal" tabindex="-1" aria-labelledby="createModuleModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="createModuleModalLabel">Create Module</h5>
@@ -43,7 +40,7 @@
 
 <!-- Edit Modal -->
 <div class="modal fade" id="editModuleModal" tabindex="-1" aria-labelledby="editModuleModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="editModuleModalLabel">Edit Module</h5>
@@ -58,85 +55,331 @@
 
 @section Scripts {
     <script>
-        $(document).ready(function() {
-            // Load modules when page loads
-            loadModules();
-            
-            // Load create modal content when create button is clicked
-            $('#createModuleBtn').click(function() {
-                loadCreateModal();
-            });
-        });
-        
+        // Define loadModules function in global scope
         function loadModules() {
-            $.get(`/api/projects/${'@projectId'}/modules`, function(data) {
-                let modulesHtml = '';
-                if (data.length > 0) {
-                    modulesHtml = '<div class="row">';
-                    data.forEach(function(module) {
-                        modulesHtml += `
-                            <div class="col-md-4 mb-3">
-                                <div class="card">
-                                    <div class="card-body">
-                                        <h5 class="card-title">${module.name}</h5>
-                                        <p class="card-text">${module.description}</p>
-                                        <p class="card-text"><small class="text-muted">Sort Order: ${module.sortOrder}</small></p>
-                                        <button class="btn btn-sm btn-outline-primary edit-module-btn" data-module-id="${module.id}">Edit</button>
-                                        <button class="btn btn-sm btn-outline-danger delete-module-btn" data-module-id="${module.id}">Delete</button>
+            fetch(`/api/projects/${'@projectId'}/modules`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    let modulesHtml = '';
+                    if (data && data.length > 0) {
+                        modulesHtml = '<div class="row">';
+                        data.forEach(function (module) {
+                            modulesHtml += `
+                                    <div class="col-lg-6 mb-3">
+                                        <div class="card">
+                                            <div class="card-body">
+                                                <h5 class="card-title">${module.name || 'No name'}</h5>
+                                                <p class="card-text">${module.description || 'No description'}</p>
+                                                <p class="card-text"><small class="text-muted">Sort Order: ${module.sortOrder || 0}</small></p>
+                                                <button class="btn btn-sm btn-outline-primary edit-module-btn" data-module-id="${module.id}">Edit</button>
+                                                <button class="btn btn-sm btn-outline-danger delete-module-btn" data-module-id="${module.id}">Delete</button>
+                                            </div>
+                                        </div>
                                     </div>
-                                </div>
-                            </div>
-                        `;
+                                `;
+                        });
+                        modulesHtml += '</div>';
+                    } else {
+                        modulesHtml = '<p>No modules found.</p>';
+                    }
+
+                    const modulesList = document.getElementById('modulesList');
+                    if (modulesList) {
+                        modulesList.innerHTML = modulesHtml;
+                    }
+
+                    // Attach event handlers for edit buttons
+                    document.querySelectorAll('.edit-module-btn').forEach(button => {
+                        // Hindari duplikasi event listener
+                        const newButton = button.cloneNode(true);
+                        button.parentNode.replaceChild(newButton, button);
+                        newButton.addEventListener('click', function () {
+                            const moduleId = this.getAttribute('data-module-id');
+                            loadEditModal(moduleId);
+                        });
                     });
-                    modulesHtml += '</div>';
-                } else {
-                    modulesHtml = '<p>No modules found.</p>';
-                }
-                
-                $('#modulesList').html(modulesHtml);
-                
-                // Attach event handlers for edit buttons
-                $('.edit-module-btn').click(function() {
-                    const moduleId = $(this).data('module-id');
-                    loadEditModal(moduleId);
-                });
-                
-                // Attach event handlers for delete buttons
-                $('.delete-module-btn').click(function() {
-                    const moduleId = $(this).data('module-id');
-                    deleteModule(moduleId);
-                });
-            });
-        }
-        
-        function loadCreateModal() {
-            $.get(`/ModuleView/CreateModal?projectId=${'@projectId'}`, function(data) {
-                $('#createModuleModal .modal-body').html(data);
-                $('#createModuleModal').modal('show');
-            });
-        }
-        
-        function loadEditModal(moduleId) {
-            $.get(`/ModuleView/EditModal?projectId=${'@projectId'}&moduleId=${moduleId}`, function(data) {
-                $('#editModuleModal .modal-body').html(data);
-                $('#editModuleModal').modal('show');
-            });
-        }
-        
-        function deleteModule(moduleId) {
-            if (confirm('Are you sure you want to delete this module?')) {
-                $.ajax({
-                    url: `/api/projects/${'@projectId'}/modules/${moduleId}`,
-                    type: 'DELETE',
-                    success: function(result) {
-                        loadModules(); // Reload modules list
-                        alert('Module deleted successfully');
-                    },
-                    error: function(xhr, status, error) {
-                        alert('Error deleting module: ' + error);
+
+                    // Attach event handlers for delete buttons
+                    document.querySelectorAll('.delete-module-btn').forEach(button => {
+                        // Hindari duplikasi event listener
+                        const newButton = button.cloneNode(true);
+                        button.parentNode.replaceChild(newButton, button);
+                        newButton.addEventListener('click', function () {
+                            const moduleId = this.getAttribute('data-module-id');
+                            deleteModule(moduleId);
+                        });
+                    });
+                })
+                .catch(error => {
+                    console.error('Error loading modules:', error);
+                    const modulesList = document.getElementById('modulesList');
+                    if (modulesList) {
+                        modulesList.innerHTML = '<p>Error loading modules. Please try again later.</p>';
                     }
                 });
+        }
+
+        function loadCreateModal() {
+            fetch(`/ModuleView/CreateModal?projectId=${'@projectId'}`)
+                .then(response => response.text())
+                .then(data => {
+                    document.querySelector('#createModuleModal .modal-body').innerHTML = data;
+                    var createModalElement = document.getElementById('createModuleModal');
+
+                    // Pastikan tidak ada elemen yang memiliki fokus sebelum menampilkan modal
+                    const focusedElement = document.activeElement;
+                    if (focusedElement && createModalElement.contains(focusedElement)) {
+                        focusedElement.blur();
+                    }
+
+                    var createModal = new bootstrap.Modal(createModalElement);
+                    createModal.show();
+
+                    // Tambahkan event listener untuk form setelah konten dimuat
+                    const form = document.getElementById('createModuleForm');
+                    if (form) {
+                        form.addEventListener('submit', function (e) {
+                            e.preventDefault();
+
+                            const formData = {
+                                projectId: document.getElementById('projectId').value,
+                                workspaceId: document.getElementById('workspaceId').value,
+                                name: document.getElementById('name').value,
+                                description: document.getElementById('description').value,
+                                sortOrder: parseInt(document.getElementById('sortOrder').value)
+                            };
+
+                            fetch(`/api/projects/${formData.projectId}/modules`, {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json'
+                                },
+                                body: JSON.stringify(formData)
+                            })
+                                .then(response => {
+                                    if (response.ok) {
+                                        return response.json();
+                                    }
+                                    throw new Error('Network response was not ok.');
+                                })
+                                .then(data => {
+                                    // Reset form and close modal
+                                    document.getElementById('createModuleForm').reset();
+                                    var modalElement = document.getElementById('createModuleModal');
+                                    // Hapus fokus dari elemen dalam modal sebelum menutup
+                                    @* const focusedElement = document.activeElement; *@
+                                        @* if (focusedElement && modalElement.contains(focusedElement)) {
+                                    focusedElement.blur();
+                                } *@
+                                
+                                    var modal = bootstrap.Modal.getInstance(modalElement);
+                                    if (modal) {
+                                        alert('masuk hide!');
+                                        modal.hide();
+                                    } else {
+                                        // Fallback jika instance tidak ditemukan
+                                        alert('masuk fallback!');
+                                        modalElement.classList.remove('show');
+                                        modalElement.style.display = 'none';
+                                        document.body.classList.remove('modal-open');
+                                    }
+                                    const backdrop = document.querySelector('.modal-backdrop');
+                                    if (backdrop) {
+                                        backdrop.remove();
+                                    }
+
+                                    // Reload modules using globally accessible function
+                                    if (typeof loadModules === 'function') {
+                                        loadModules();
+                                    } else {
+                                        console.error('loadModules function is not accessible');
+                                    }
+                                })
+                                .catch(error => {
+                                    alert('Error creating module: ' + error.message);
+                                    console.error('Error:', error);
+                                });
+                        });
+                    }
+                })
+                .catch(error => console.error('Error loading create modal:', error));
+        }
+
+        function loadEditModal(moduleId) {
+            fetch(`/ModuleView/EditModal?projectId=${'@projectId'}&moduleId=${moduleId}`)
+                .then(response => response.text())
+                .then(data => {
+                    document.querySelector('#editModuleModal .modal-body').innerHTML = data;
+                    var editModalElement = document.getElementById('editModuleModal');
+
+                    // Pastikan tidak ada elemen yang memiliki fokus sebelum menampilkan modal
+                    const focusedElement = document.activeElement;
+                    if (focusedElement && editModalElement.contains(focusedElement)) {
+                        focusedElement.blur();
+                    }
+
+                    var editModal = new bootstrap.Modal(editModalElement);
+                    editModal.show();
+
+                    // Tambahkan event listener untuk form setelah konten dimuat
+                    const form = document.getElementById('editModuleForm');
+                    if (form) {
+                        // Load module data
+                        fetch(`/api/projects/${'@projectId'}/modules`)
+                            .then(response => response.json())
+                            .then(modules => {
+                                const module = modules.find(m => m.id === moduleId);
+                                if (module) {
+                                    document.getElementById('name').value = module.name;
+                                    document.getElementById('sortOrder').value = module.sortOrder;
+                                    document.getElementById('workspaceId').value = module.workspaceId;
+                                    document.getElementById('description').value = module.description;
+                                }
+                            })
+                            .catch(error => console.error('Error loading module data:', error));
+
+                        // Tambahkan event listener untuk form submit
+                        form.addEventListener('submit', function (e) {
+                            e.preventDefault();
+
+                            const formData = {
+                                projectId: document.getElementById('projectId').value,
+                                moduleId: document.getElementById('moduleId').value,
+                                workspaceId: document.getElementById('workspaceId').value,
+                                name: document.getElementById('name').value,
+                                description: document.getElementById('description').value,
+                                sortOrder: parseInt(document.getElementById('sortOrder').value)
+                            };
+
+                            fetch(`/api/projects/${formData.projectId}/modules/${formData.moduleId}`, {
+                                method: 'PUT',
+                                headers: {
+                                    'Content-Type': 'application/json'
+                                },
+                                body: JSON.stringify(formData)
+                            })
+                                .then(response => {
+                                    if (response.ok) {
+                                        return response.json();
+                                    }
+                                    throw new Error('Network response was not ok.');
+                                })
+                                .then(data => {
+                                    // Close modal
+                                    var modalElement = document.getElementById('editModuleModal');
+                                    // Hapus fokus dari elemen dalam modal sebelum menutup
+                                    const focusedElement = document.activeElement;
+                                    if (focusedElement && modalElement.contains(focusedElement)) {
+                                        focusedElement.blur();
+                                    }
+
+                                    var modal = bootstrap.Modal.getInstance(modalElement);
+                                    if (modal) {
+                                        modal.hide();
+                                    } else {
+                                        // Fallback jika instance tidak ditemukan
+                                        modalElement.classList.remove('show');
+                                        modalElement.style.display = 'none';
+                                        document.body.classList.remove('modal-open');
+                                        const backdrop = document.querySelector('.modal-backdrop');
+                                        if (backdrop) {
+                                            backdrop.remove();
+                                        }
+                                    }
+
+                                    // Reload modules using globally accessible function
+                                    if (typeof loadModules === 'function') {
+                                        loadModules();
+                                    } else {
+                                        console.error('loadModules function is not accessible');
+                                    }
+                                })
+                                .catch(error => {
+                                    alert('Error updating module: ' + error.message);
+                                    console.error('Error:', error);
+                                });
+                        });
+                    }
+                })
+                .catch(error => console.error('Error loading edit modal:', error));
+        }
+
+        function deleteModule(moduleId) {
+            if (confirm('Are you sure you want to delete this module?')) {
+                fetch(`/api/projects/${'@projectId'}/modules/${moduleId}`, {
+                    method: 'DELETE'
+                })
+                    .then(response => {
+                        if (response.ok) {
+                            loadModules(); // Reload modules list
+                            alert('Module deleted successfully');
+                        } else if (response.status === 404) {
+                            throw new Error('Module not found');
+                        } else {
+                            throw new Error('Failed to delete module');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error deleting module:', error);
+                        alert('Error deleting module: ' + error.message);
+                    });
             }
         }
+
+        // Fungsi untuk membersihkan modal setelah ditutup
+        function cleanupModal(modalId) {
+            const modalElement = document.getElementById(modalId);
+            if (modalElement) {
+                // Hapus fokus dari elemen dalam modal
+                const focusedElement = document.activeElement;
+                if (focusedElement && modalElement.contains(focusedElement)) {
+                    focusedElement.blur();
+                }
+
+                // Hapus atribut aria-hidden
+                modalElement.removeAttribute('aria-hidden');
+
+                // Bersihkan konten modal
+                const modalBody = modalElement.querySelector('.modal-body');
+                if (modalBody) {
+                    modalBody.innerHTML = '';
+                }
+            }
+        }
+
+        // Tambahkan event listener untuk membersihkan modal setelah ditutup
+        document.addEventListener('DOMContentLoaded', function () {
+            // Load modules when page loads
+            loadModules();
+
+            // Tambahkan event listener untuk membersihkan modal saat ditutup
+            const createModal = document.getElementById('createModuleModal');
+            if (createModal) {
+                createModal.addEventListener('hidden.bs.modal', function () {
+                    cleanupModal('createModuleModal');
+                });
+            }
+
+            const editModal = document.getElementById('editModuleModal');
+            if (editModal) {
+                editModal.addEventListener('hidden.bs.modal', function () {
+                    cleanupModal('editModuleModal');
+                });
+            }
+
+            // Load create modal content when create button is clicked
+            const createModuleBtn = document.getElementById('createModuleBtn');
+            if (createModuleBtn) {
+                createModuleBtn.addEventListener('click', function () {
+                    loadCreateModal();
+                });
+            }
+        });
     </script>
+
 }

@@ -15,7 +15,7 @@ namespace SFCoreProTM.Persistence.Configurations
             builder.Property(task => task.ProjectId).IsRequired();
             builder.Property(task => task.ModuleId).IsRequired();
             builder.Property(task => task.Name).HasMaxLength(255).IsRequired();
-            builder.Property(task => task.Description).HasMaxLength(1000).IsRequired();
+            builder.Property(task => task.Description).IsRequired();
             builder.Property(task => task.SortOrder).IsRequired();
             builder.Property(task => task.Status).IsRequired();
             builder.Property(task => task.IsErd).IsRequired();

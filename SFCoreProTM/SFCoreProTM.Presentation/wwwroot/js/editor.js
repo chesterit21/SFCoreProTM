@@ -1,3 +1,6 @@
+// File ini tidak digunakan lagi karena kita kembali ke penggunaan textarea biasa
+// untuk input deskripsi. Fungsi-fungsi di bawah ini tidak aktif digunakan.
+
 // Fungsi untuk memuat script secara dinamis
 function loadScript(src) {
     return new Promise((resolve, reject) => {

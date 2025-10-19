@@ -164,6 +164,18 @@ public sealed class AuthController : ControllerBase
         return Ok(response);
     }
 
+    [HttpPost("logout")]
+    [Authorize]
+    public IActionResult Logout()
+    {
+        // Hapus cookie auth
+        Response.Cookies.Delete(_jwtOptions.CookieName);
+        
+        _logger.LogInformation("User logged out successfully");
+        
+        return Ok(new { message = "Logout successful" });
+    }
+
     private void SetAuthCookie(string token, DateTime expiresAt, bool rememberMe)
     {
         var cookieOptions = new Microsoft.AspNetCore.Http.CookieOptions

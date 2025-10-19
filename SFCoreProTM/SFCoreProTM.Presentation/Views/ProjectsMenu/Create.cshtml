@@ -3,13 +3,14 @@
     ViewData["Title"] = "Create New Project";
     Layout = "~/Views/Shared/_LayoutApp.cshtml"; 
     var workspaceId = ViewData["WorkspaceId"] as Guid?;
+    ViewData["ActiveMenuId"] = "projects";
 }
 
 <h2>Create New Project</h2>
 <hr />
 
 <div class="row">
-    <div class="col-md-8">
+    <div class="col-md-12">
         @* Tag form tanpa asp-action/asp-controller, akan ditangani JS *@
         <form id="createProjectForm" data-workspace-id="@workspaceId">
             @Html.AntiForgeryToken() @* Tetap diperlukan untuk header request JS *@
@@ -25,8 +26,7 @@
 
             <div class="mb-3">
                 <label asp-for="DescriptionPlainText" class="form-label fw-semibold">Description</label>
-                <div id="projectDescriptionEditor" class="border rounded"></div>
-                <input asp-for="DescriptionPlainText" type="hidden" />
+                <textarea asp-for="DescriptionPlainText" class="form-control" rows="25" placeholder="Enter project description"></textarea>
             </div>
 
             <div class="mt-4">
@@ -34,7 +34,7 @@
                     <span id="submitSpinner" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
                     Create Project
                 </button>
-                <a asp-controller="Dashboard" asp-action="Index" class="btn btn-secondary ms-2">Cancel</a>
+                <a asp-controller="ProjectsMenu" asp-action="Index" class="btn btn-secondary ms-2">Cancel</a>
             </div>
         </form>
     </div>
@@ -42,21 +42,8 @@
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
-    <script src="https://cdn.jsdelivr.net/npm/@("@")editorjs/editorjs@latest"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@("@")editorjs/header@latest"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@("@")editorjs/list@latest"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@("@")editorjs/paragraph@latest"></script>
-    <script type="module">
-        import { initializeEditor, getEditorPlainText } from '/js/editor.js';
-        
-        // Inisialisasi Editor.js
-        let editor;
-        
-        // Tunggu sampai DOM selesai dimuat
-        document.addEventListener('DOMContentLoaded', function() {
-            editor = initializeEditor('projectDescriptionEditor');
-        });
-
+    
+    <script>
         // Helper untuk mendapatkan CSRF token dari form
         function getAntiForgeryToken() {
             const tokenInput = document.querySelector('input[name="__RequestVerificationToken"]');
@@ -89,16 +76,9 @@
         const submitSpinner = document.getElementById('submitSpinner');
         const errorAlert = document.getElementById('formErrorAlert');
         const successAlert = document.getElementById('formSuccessAlert');
-        const descriptionInput = document.querySelector('input[name="DescriptionPlainText"]');
 
         form.addEventListener('submit', async function(event) {
             event.preventDefault(); // Mencegah submit standar HTML
-
-            // Simpan konten editor ke input tersembunyi
-            if (editor) {
-                const plainText = await getEditorPlainText(editor);
-                descriptionInput.value = plainText;
-            }
 
             // Reset alert
             errorAlert.classList.add('d-none');

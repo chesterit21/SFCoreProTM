@@ -13,7 +13,7 @@ public class ErdDefinitionConfiguration : IEntityTypeConfiguration<ErdDefinition
         builder.Property(e => e.Id).ValueGeneratedNever();
         builder.Property(e => e.ModuleId).IsRequired();
         builder.Property(e => e.TName).HasMaxLength(255).IsRequired();
-        builder.Property(e => e.Description).HasMaxLength(1000).IsRequired();
+        builder.Property(e => e.Description);
         builder.Property(e => e.EntityName).HasMaxLength(255).IsRequired();
         builder.Property(e => e.AttributeName).HasMaxLength(255).IsRequired();
         builder.Property(e => e.AttributeType).HasMaxLength(100).IsRequired();

@@ -14,8 +14,7 @@
     
     <div class="mb-3">
         <label for="description" class="form-label">Description</label>
-        <div id="taskDescriptionEditor" class="border rounded" style="min-height: 150px;"></div>
-        <input type="hidden" id="description" name="description" />
+        <textarea class="form-control" id="description" name="description" rows="5"></textarea>
     </div>
     
     <div class="mb-3">
@@ -34,21 +33,7 @@
     </div>
 </form>
 
-<script src="https://cdn.jsdelivr.net/npm/@("@")editorjs/editorjs@latest"></script>
-<script src="https://cdn.jsdelivr.net/npm/@("@")editorjs/header@latest"></script>
-<script src="https://cdn.jsdelivr.net/npm/@("@")editorjs/list@latest"></script>
-<script src="https://cdn.jsdelivr.net/npm/@("@")editorjs/paragraph@latest"></script>
-<script type="module">
-    import { initializeEditor, getEditorPlainText } from '/js/editor.js';
-    
-    // Inisialisasi Editor.js
-    let taskEditor;
-    
-    // Tunggu sampai DOM selesai dimuat
-    document.addEventListener('DOMContentLoaded', function() {
-        taskEditor = initializeEditor('taskDescriptionEditor');
-    });
-    
+<script>
     // Get workspace ID and project ID from some global variable or API call
     // For now, we'll leave it empty and you can implement as needed
     document.getElementById('workspaceId').value = ''; // You need to set this appropriately
@@ -56,12 +41,6 @@
     
     document.getElementById('createTaskForm').addEventListener('submit', async function(e) {
         e.preventDefault();
-        
-        // Simpan konten editor ke input tersembunyi
-        if (taskEditor) {
-            const plainText = await getEditorPlainText(taskEditor);
-            document.getElementById('description').value = plainText;
-        }
         
         const formData = {
             moduleId: document.getElementById('moduleId').value,

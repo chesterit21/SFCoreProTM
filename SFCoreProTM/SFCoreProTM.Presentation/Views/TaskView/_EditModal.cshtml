@@ -16,8 +16,7 @@
     
     <div class="mb-3">
         <label for="description" class="form-label">Description</label>
-        <div id="editTaskDescriptionEditor" class="border rounded" style="min-height: 150px;"></div>
-        <input type="hidden" id="description" name="description" />
+        <textarea class="form-control" id="description" name="description" rows="5"></textarea>
     </div>
     
     <div class="mb-3">
@@ -36,15 +35,7 @@
     </div>
 </form>
 
-<script src="https://cdn.jsdelivr.net/npm/@("@")editorjs/editorjs@latest"></script>
-<script src="https://cdn.jsdelivr.net/npm/@("@")editorjs/header@latest"></script>
-<script src="https://cdn.jsdelivr.net/npm/@("@")editorjs/list@latest"></script>
-<script src="https://cdn.jsdelivr.net/npm/@("@")editorjs/paragraph@latest"></script>
-<script type="module">
-    import { initializeEditor, getEditorPlainText } from '/js/editor.js';
-    
-    let editTaskEditor;
-    
+<script>
     // Load task data when modal is shown
     document.addEventListener('DOMContentLoaded', function() {
         const taskId = document.getElementById('taskId').value;
@@ -59,30 +50,13 @@
                     document.getElementById('isErd').checked = task.isErd;
                     document.getElementById('projectId').value = task.projectId;
                     document.getElementById('workspaceId').value = task.workspaceId;
-                    
-                    // Inisialisasi editor dengan konten yang ada
-                    editTaskEditor = initializeEditor('editTaskDescriptionEditor', {
-                        blocks: [
-                            {
-                                type: "paragraph",
-                                data: {
-                                    text: task.description || ""
-                                }
-                            }
-                        ]
-                    });
+                    document.getElementById('description').value = task.description || "";
                 }
             });
     });
     
     document.getElementById('editTaskForm').addEventListener('submit', async function(e) {
         e.preventDefault();
-        
-        // Simpan konten editor ke input tersembunyi
-        if (editTaskEditor) {
-            const plainText = await getEditorPlainText(editTaskEditor);
-            document.getElementById('description').value = plainText;
-        }
         
         const formData = {
             moduleId: document.getElementById('moduleId').value,

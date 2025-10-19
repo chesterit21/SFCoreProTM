@@ -16,7 +16,7 @@ public class FlowTaskConfiguration : IEntityTypeConfiguration<FlowTask>
         builder.Property(f => f.ModuleId).IsRequired();
         builder.Property(f => f.TaskId).IsRequired();
         builder.Property(f => f.Name).HasMaxLength(255).IsRequired();
-        builder.Property(f => f.Description).HasMaxLength(1000).IsRequired();
+        builder.Property(f => f.Description);
         builder.Property(f => f.SortOrder).IsRequired();
         builder.Property(f => f.FlowStatus).IsRequired();
     }
