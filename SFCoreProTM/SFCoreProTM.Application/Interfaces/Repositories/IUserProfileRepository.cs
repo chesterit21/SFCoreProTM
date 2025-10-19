@@ -8,5 +8,5 @@ namespace SFCoreProTM.Application.Interfaces.Repositories;
 public interface IUserProfileRepository
 {
     Task AddAsync(UserProfile profile, CancellationToken cancellationToken);
+    Task<UserProfile?> GetByUserIdAsync(Guid userId, CancellationToken cancellationToken); // <-- TAMBAHKAN INI
 }
-

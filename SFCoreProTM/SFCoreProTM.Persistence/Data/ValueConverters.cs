@@ -186,33 +186,6 @@ public static class ValueConverters
             ? ViewPreferences.CreateIssueDefaults()
             : ViewPreferences.Create(value.Filters, value.DisplayFilters, value.DisplayProperties, value.RichFilters));
 
-    public static readonly ValueConverter<WorkspaceMemberPreferences, string?> WorkspaceMemberPreferencesConverter = new(
-        value => value == null
-            ? null
-            : JsonSerializer.Serialize(
-                new WorkspaceMemberPreferencesSurrogate(
-                    value.View.RawJson,
-                    value.Defaults.RawJson,
-                    value.Issue.RawJson),
-                JsonOptions),
-        json => DeserializeWorkspaceMemberPreferences(json));
-
-    public static readonly ValueComparer<WorkspaceMemberPreferences> WorkspaceMemberPreferencesComparer = new(
-        (left, right) =>
-            (left == null && right == null) ||
-            (left != null && right != null &&
-             string.Equals(left.View.RawJson, right.View.RawJson, StringComparison.Ordinal) &&
-             string.Equals(left.Defaults.RawJson, right.Defaults.RawJson, StringComparison.Ordinal) &&
-             string.Equals(left.Issue.RawJson, right.Issue.RawJson, StringComparison.Ordinal)),
-        value => value == null
-            ? 0
-            : HashCode.Combine(value.View.RawJson, value.Defaults.RawJson, value.Issue.RawJson),
-        value => value == null
-            ? WorkspaceMemberPreferences.CreateDefault()
-            : WorkspaceMemberPreferences.Create(
-                StructuredData.FromJson(value.View.RawJson),
-                StructuredData.FromJson(value.Defaults.RawJson),
-                StructuredData.FromJson(value.Issue.RawJson)));
 
     public static readonly ValueConverter<ProjectMemberPreferences, string?> ProjectMemberPreferencesConverter = new(
         value => value == null
@@ -322,32 +295,6 @@ public static class ValueConverters
             StructuredData.FromJson(data.Defaults),
             StructuredData.FromJson(data.Preferences));
     }
-
-    private static WorkspaceMemberPreferences DeserializeWorkspaceMemberPreferences(string? value)
-    {
-        if (value is null)
-        {
-            return WorkspaceMemberPreferences.CreateDefault();
-        }
-
-        var payload = value.Trim();
-        if (payload.Length == 0)
-        {
-            return WorkspaceMemberPreferences.CreateDefault();
-        }
-
-        var data = JsonSerializer.Deserialize<WorkspaceMemberPreferencesSurrogate>(payload, JsonOptions);
-        if (data == null)
-        {
-            return WorkspaceMemberPreferences.CreateDefault();
-        }
-
-        return WorkspaceMemberPreferences.Create(
-            StructuredData.FromJson(data.View),
-            StructuredData.FromJson(data.Defaults),
-            StructuredData.FromJson(data.Issue));
-    }
-
     private static List<Url> DeserializeUrlList(string? value)
     {
         if (value is null)

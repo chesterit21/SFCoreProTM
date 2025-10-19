@@ -14,6 +14,7 @@ namespace SFCoreProTM.Application.Features.Authentication.Commands.SignIn;
 public sealed class SignInCommandHandler : IRequestHandler<SignInCommand, AuthResultDto>
 {
     private readonly IUserRepository _userRepository;
+    private readonly IUserProfileRepository _userProfileRepository;
     private readonly IPasswordHasher _passwordHasher;
     private readonly IDateTimeProvider _dateTimeProvider;
     private readonly IUnitOfWork _unitOfWork;
@@ -22,9 +23,11 @@ public sealed class SignInCommandHandler : IRequestHandler<SignInCommand, AuthRe
         IUserRepository userRepository,
         IPasswordHasher passwordHasher,
         IDateTimeProvider dateTimeProvider,
-        IUnitOfWork unitOfWork)
+        IUnitOfWork unitOfWork,
+        IUserProfileRepository userProfileRepository)
     {
         _userRepository = userRepository;
+        _userProfileRepository = userProfileRepository;
         _passwordHasher = passwordHasher;
         _dateTimeProvider = dateTimeProvider;
         _unitOfWork = unitOfWork;
@@ -64,6 +67,10 @@ public sealed class SignInCommandHandler : IRequestHandler<SignInCommand, AuthRe
             throw new AuthenticationException("Invalid email or password.");
         }
 
+        // --- AMBIL USER PROFILE ---
+        var profile = await _userProfileRepository.GetByUserIdAsync(user.Id, cancellationToken);
+        // -------------------------
+
         var now = _dateTimeProvider.UtcNow;
         user.RecordSuccessfulLogin(now, "email", request.IpAddress, request.UserAgent);
 
@@ -76,6 +83,8 @@ public sealed class SignInCommandHandler : IRequestHandler<SignInCommand, AuthRe
             DisplayName = user.DisplayName,
             LastLoginAt = user.LastLoginTime,
             IsPasswordAutoset = user.IsPasswordAutoset,
+            LastWorkspaceId = profile?.LastWorkspaceId // <-- SERTAKAN WORKSPACE ID
         };
     }
 }
+

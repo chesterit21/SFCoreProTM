@@ -1,0 +1,216 @@
+@{
+    ViewData["Title"] = "Sprint Plannings";
+    Layout = "~/Views/Shared/_LayoutApp.cshtml";
+    var moduleId = ViewBag.ModuleId as Guid?;
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h3 class="card-title">Sprint Plannings</h3>
+                        <button type="button" class="btn btn-primary" id="createSprintBtn">
+                            <i class="fas fa-plus"></i> Create Sprint Planning
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div id="sprintPlanningsList">
+                        <!-- Sprint Plannings will be loaded here by JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Create Modal -->
+<div class="modal fade" id="createSprintModal" tabindex="-1" aria-labelledby="createSprintModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="createSprintModalLabel">Create Sprint Planning</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Create form will be loaded here by JavaScript -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Modal -->
+<div class="modal fade" id="editSprintModal" tabindex="-1" aria-labelledby="editSprintModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editSprintModalLabel">Edit Sprint Planning</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Edit form will be loaded here by JavaScript -->
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Load sprint plannings when page loads
+            loadSprintPlannings();
+            
+            // Load create modal content when create button is clicked
+            document.getElementById('createSprintBtn').addEventListener('click', function() {
+                loadCreateModal();
+            });
+        });
+        
+        function loadSprintPlannings() {
+            fetch(`/api/modules/${'@moduleId'}/sprint-plannings`)
+                .then(response => response.json())
+                .then(data => {
+                    let sprintHtml = '';
+                    if (data.length > 0) {
+                        sprintHtml = '<div class="table-responsive"><table class="table table-bordered table-striped">';
+                        sprintHtml += '<thead><tr><th>Name</th><th>Description</th><th>Start Date</th><th>Target Date</th><th>Sort Order</th><th>Status</th><th>Actions</th></tr></thead><tbody>';
+                        data.forEach(function(sprint) {
+                            const statusText = getStatusText(sprint.sprintStatus);
+                            const statusClass = getStatusClass(sprint.sprintStatus);
+                            
+                            sprintHtml += `<tr>
+                                <td>${sprint.name}</td>
+                                <td>${sprint.description}</td>
+                                <td>${new Date(sprint.startDate).toLocaleDateString()}</td>
+                                <td>${new Date(sprint.targetDate).toLocaleDateString()}</td>
+                                <td>${sprint.sortOrder}</td>
+                                <td><span class="badge ${statusClass}">${statusText}</span></td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-primary edit-sprint-btn" data-sprint-id="${sprint.id}">Edit</button>
+                                    <button class="btn btn-sm btn-outline-danger delete-sprint-btn" data-sprint-id="${sprint.id}">Delete</button>
+                                    <button class="btn btn-sm btn-outline-success run-sprint-btn" data-sprint-id="${sprint.id}">Run</button>
+                                </td>
+                            </tr>`;
+                        });
+                        sprintHtml += '</tbody></table></div>';
+                    } else {
+                        sprintHtml = '<p>No sprint plannings found.</p>';
+                    }
+                    
+                    document.getElementById('sprintPlanningsList').innerHTML = sprintHtml;
+                    
+                    // Attach event handlers for edit buttons
+                    document.querySelectorAll('.edit-sprint-btn').forEach(button => {
+                        button.addEventListener('click', function() {
+                            const sprintId = this.getAttribute('data-sprint-id');
+                            loadEditModal(sprintId);
+                        });
+                    });
+                    
+                    // Attach event handlers for delete buttons
+                    document.querySelectorAll('.delete-sprint-btn').forEach(button => {
+                        button.addEventListener('click', function() {
+                            const sprintId = this.getAttribute('data-sprint-id');
+                            deleteSprintPlanning(sprintId);
+                        });
+                    });
+                    
+                    // Attach event handlers for run buttons
+                    document.querySelectorAll('.run-sprint-btn').forEach(button => {
+                        button.addEventListener('click', function() {
+                            const sprintId = this.getAttribute('data-sprint-id');
+                            runSprintPlanning(sprintId);
+                        });
+                    });
+                })
+                .catch(error => console.error('Error loading sprint plannings:', error));
+        }
+        
+        function getStatusText(status) {
+            switch(status) {
+                case 0: return 'In Progress';
+                case 1: return 'Done';
+                case 2: return 'Canceled';
+                case 3: return 'Pause';
+                default: return 'Unknown';
+            }
+        }
+        
+        function getStatusClass(status) {
+            switch(status) {
+                case 0: return 'bg-primary';
+                case 1: return 'bg-success';
+                case 2: return 'bg-danger';
+                case 3: return 'bg-warning';
+                default: return 'bg-secondary';
+            }
+        }
+        
+        function loadCreateModal() {
+            fetch(`/SprintView/CreateModal?moduleId=${'@moduleId'}`)
+                .then(response => response.text())
+                .then(data => {
+                    document.querySelector('#createSprintModal .modal-body').innerHTML = data;
+                    var createModal = new bootstrap.Modal(document.getElementById('createSprintModal'));
+                    createModal.show();
+                })
+                .catch(error => console.error('Error loading create modal:', error));
+        }
+        
+        function loadEditModal(sprintId) {
+            fetch(`/SprintView/EditModal?moduleId=${'@moduleId'}&sprintPlanningId=${sprintId}`)
+                .then(response => response.text())
+                .then(data => {
+                    document.querySelector('#editSprintModal .modal-body').innerHTML = data;
+                    var editModal = new bootstrap.Modal(document.getElementById('editSprintModal'));
+                    editModal.show();
+                })
+                .catch(error => console.error('Error loading edit modal:', error));
+        }
+        
+        function deleteSprintPlanning(sprintId) {
+            if (confirm('Are you sure you want to delete this sprint planning?')) {
+                fetch(`/api/modules/${'@moduleId'}/sprint-plannings/${sprintId}`, {
+                    method: 'DELETE'
+                })
+                .then(response => {
+                    if (response.ok) {
+                        loadSprintPlannings(); // Reload sprint plannings list
+                        alert('Sprint planning deleted successfully');
+                    } else {
+                        throw new Error('Failed to delete sprint planning');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error deleting sprint planning:', error);
+                    alert('Error deleting sprint planning: ' + error.message);
+                });
+            }
+        }
+        
+        function runSprintPlanning(sprintId) {
+            // Set sprint status to InProgress (0)
+            fetch(`/api/modules/${'@moduleId'}/sprint-plannings/${sprintId}/status`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(0) // InProgress status
+            })
+            .then(response => {
+                if (response.ok) {
+                    loadSprintPlannings(); // Reload sprint plannings list
+                    alert('Sprint planning is now running');
+                } else {
+                    throw new Error('Failed to run sprint planning');
+                }
+            })
+            .catch(error => {
+                console.error('Error running sprint planning:', error);
+                alert('Error running sprint planning: ' + error.message);
+            });
+        }
+    </script>
+}

@@ -9,6 +9,7 @@ public sealed class AuthResponse
     public string DisplayName { get; init; } = string.Empty;
     public DateTime? LastLoginAt { get; init; }
     public bool IsPasswordAutoset { get; init; }
+    public Guid? LastWorkspaceId { get; init; }
     public string AccessToken { get; init; } = string.Empty;
     public DateTime ExpiresAtUtc { get; init; }
 }

@@ -1,0 +1,163 @@
+@{
+    ViewData["Title"] = "ERD Definitions";
+    Layout = "~/Views/Shared/_LayoutApp.cshtml";
+    var moduleId = ViewBag.ModuleId as Guid?;
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h3 class="card-title">ERD Definitions</h3>
+                        <button type="button" class="btn btn-primary" id="createErdBtn">
+                            <i class="fas fa-plus"></i> Create ERD Definition
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div id="erdDefinitionsList">
+                        <!-- ERD Definitions will be loaded here by JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Create Modal -->
+<div class="modal fade" id="createErdModal" tabindex="-1" aria-labelledby="createErdModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="createErdModalLabel">Create ERD Definition</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Create form will be loaded here by JavaScript -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Modal -->
+<div class="modal fade" id="editErdModal" tabindex="-1" aria-labelledby="editErdModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editErdModalLabel">Edit ERD Definition</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Edit form will be loaded here by JavaScript -->
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Load ERD definitions when page loads
+            loadErdDefinitions();
+            
+            // Load create modal content when create button is clicked
+            document.getElementById('createErdBtn').addEventListener('click', function() {
+                loadCreateModal();
+            });
+        });
+        
+        function loadErdDefinitions() {
+            fetch(`/api/modules/${'@moduleId'}/erd-definitions`)
+                .then(response => response.json())
+                .then(data => {
+                    let erdHtml = '';
+                    if (data.length > 0) {
+                        erdHtml = '<div class="table-responsive"><table class="table table-bordered table-striped">';
+                        erdHtml += '<thead><tr><th>Entity Name</th><th>Attribute Name</th><th>Attribute Type</th><th>Primary Key</th><th>Accept Null</th><th>Max Char</th><th>Sort Order</th><th>Status</th><th>Actions</th></tr></thead><tbody>';
+                        data.forEach(function(erd) {
+                            erdHtml += `<tr>
+                                <td>${erd.entityName}</td>
+                                <td>${erd.attributeName}</td>
+                                <td>${erd.attributeType}</td>
+                                <td>${erd.isPrimaryKey ? 'Yes' : 'No'}</td>
+                                <td>${erd.isAcceptNull ? 'Yes' : 'No'}</td>
+                                <td>${erd.maxChar || '-'}</td>
+                                <td>${erd.sortOrder}</td>
+                                <td>${erd.erdStatus === 0 ? 'Ready' : 'Not Ready'}</td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-primary edit-erd-btn" data-erd-id="${erd.id}">Edit</button>
+                                    <button class="btn btn-sm btn-outline-danger delete-erd-btn" data-erd-id="${erd.id}">Delete</button>
+                                </td>
+                            </tr>`;
+                        });
+                        erdHtml += '</tbody></table></div>';
+                    } else {
+                        erdHtml = '<p>No ERD definitions found.</p>';
+                    }
+                    
+                    document.getElementById('erdDefinitionsList').innerHTML = erdHtml;
+                    
+                    // Attach event handlers for edit buttons
+                    document.querySelectorAll('.edit-erd-btn').forEach(button => {
+                        button.addEventListener('click', function() {
+                            const erdId = this.getAttribute('data-erd-id');
+                            loadEditModal(erdId);
+                        });
+                    });
+                    
+                    // Attach event handlers for delete buttons
+                    document.querySelectorAll('.delete-erd-btn').forEach(button => {
+                        button.addEventListener('click', function() {
+                            const erdId = this.getAttribute('data-erd-id');
+                            deleteErdDefinition(erdId);
+                        });
+                    });
+                })
+                .catch(error => console.error('Error loading ERD definitions:', error));
+        }
+        
+        function loadCreateModal() {
+            fetch(`/ErdView/CreateModal?moduleId=${'@moduleId'}`)
+                .then(response => response.text())
+                .then(data => {
+                    document.querySelector('#createErdModal .modal-body').innerHTML = data;
+                    var createModal = new bootstrap.Modal(document.getElementById('createErdModal'));
+                    createModal.show();
+                })
+                .catch(error => console.error('Error loading create modal:', error));
+        }
+        
+        function loadEditModal(erdId) {
+            fetch(`/ErdView/EditModal?moduleId=${'@moduleId'}&erdDefinitionId=${erdId}`)
+                .then(response => response.text())
+                .then(data => {
+                    document.querySelector('#editErdModal .modal-body').innerHTML = data;
+                    var editModal = new bootstrap.Modal(document.getElementById('editErdModal'));
+                    editModal.show();
+                })
+                .catch(error => console.error('Error loading edit modal:', error));
+        }
+        
+        function deleteErdDefinition(erdId) {
+            if (confirm('Are you sure you want to delete this ERD definition?')) {
+                fetch(`/api/modules/${'@moduleId'}/erd-definitions/${erdId}`, {
+                    method: 'DELETE'
+                })
+                .then(response => {
+                    if (response.ok) {
+                        loadErdDefinitions(); // Reload ERD definitions list
+                        alert('ERD definition deleted successfully');
+                    } else {
+                        throw new Error('Failed to delete ERD definition');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error deleting ERD definition:', error);
+                    alert('Error deleting ERD definition: ' + error.message);
+                });
+            }
+        }
+    </script>
+}

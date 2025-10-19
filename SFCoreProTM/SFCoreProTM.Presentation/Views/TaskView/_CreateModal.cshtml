@@ -1,0 +1,98 @@
+@{
+    var moduleId = ViewBag.ModuleId as Guid?;
+}
+
+<form id="createTaskForm">
+    <input type="hidden" id="moduleId" name="moduleId" value="@moduleId" />
+    <input type="hidden" id="projectId" name="projectId" value="" />
+    <input type="hidden" id="workspaceId" name="workspaceId" value="" />
+    
+    <div class="mb-3">
+        <label for="name" class="form-label">Name</label>
+        <input type="text" class="form-control" id="name" name="name" required>
+    </div>
+    
+    <div class="mb-3">
+        <label for="description" class="form-label">Description</label>
+        <div id="taskDescriptionEditor" class="border rounded" style="min-height: 150px;"></div>
+        <input type="hidden" id="description" name="description" />
+    </div>
+    
+    <div class="mb-3">
+        <label for="sortOrder" class="form-label">Sort Order</label>
+        <input type="number" class="form-control" id="sortOrder" name="sortOrder" value="1" min="1">
+    </div>
+    
+    <div class="mb-3 form-check">
+        <input type="checkbox" class="form-check-input" id="isErd" name="isErd">
+        <label class="form-check-label" for="isErd">Is ERD</label>
+    </div>
+    
+    <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="submit" class="btn btn-primary" id="createTaskSubmitBtn">Create</button>
+    </div>
+</form>
+
+<script src="https://cdn.jsdelivr.net/npm/@("@")editorjs/editorjs@latest"></script>
+<script src="https://cdn.jsdelivr.net/npm/@("@")editorjs/header@latest"></script>
+<script src="https://cdn.jsdelivr.net/npm/@("@")editorjs/list@latest"></script>
+<script src="https://cdn.jsdelivr.net/npm/@("@")editorjs/paragraph@latest"></script>
+<script type="module">
+    import { initializeEditor, getEditorPlainText } from '/js/editor.js';
+    
+    // Inisialisasi Editor.js
+    let taskEditor;
+    
+    // Tunggu sampai DOM selesai dimuat
+    document.addEventListener('DOMContentLoaded', function() {
+        taskEditor = initializeEditor('taskDescriptionEditor');
+    });
+    
+    // Get workspace ID and project ID from some global variable or API call
+    // For now, we'll leave it empty and you can implement as needed
+    document.getElementById('workspaceId').value = ''; // You need to set this appropriately
+    document.getElementById('projectId').value = ''; // You need to set this appropriately
+    
+    document.getElementById('createTaskForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        // Simpan konten editor ke input tersembunyi
+        if (taskEditor) {
+            const plainText = await getEditorPlainText(taskEditor);
+            document.getElementById('description').value = plainText;
+        }
+        
+        const formData = {
+            moduleId: document.getElementById('moduleId').value,
+            projectId: document.getElementById('projectId').value,
+            workspaceId: document.getElementById('workspaceId').value,
+            name: document.getElementById('name').value,
+            description: document.getElementById('description').value,
+            sortOrder: parseInt(document.getElementById('sortOrder').value),
+            isErd: document.getElementById('isErd').checked
+        };
+        
+        fetch(`/api/modules/${formData.moduleId}/tasks`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(formData)
+        })
+        .then(response => response.json())
+        .then(data => {
+            // Reset form and close modal
+            document.getElementById('createTaskForm').reset();
+            const modal = bootstrap.Modal.getInstance(document.getElementById('createTaskModal'));
+            modal.hide();
+            
+            // Reload tasks
+            loadTasks();
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error creating task: ' + error.message);
+        });
+    });
+</script>

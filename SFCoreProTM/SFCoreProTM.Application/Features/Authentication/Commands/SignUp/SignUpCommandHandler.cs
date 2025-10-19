@@ -8,7 +8,9 @@ using SFCoreProTM.Application.Interfaces;
 using SFCoreProTM.Application.Interfaces.Repositories;
 using SFCoreProTM.Application.Interfaces.Security;
 using SFCoreProTM.Domain.Entities.Users;
+using SFCoreProTM.Domain.Entities.Workspaces;
 using SFCoreProTM.Domain.ValueObjects;
+using SFCoreProTM.Shared.Extensions;
 
 namespace SFCoreProTM.Application.Features.Authentication.Commands.SignUp;
 
@@ -19,19 +21,22 @@ public sealed class SignUpCommandHandler : IRequestHandler<SignUpCommand, AuthRe
     private readonly IDateTimeProvider _dateTimeProvider;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IUserProfileRepository _userProfileRepository;
+    private readonly IWorkspaceRepository _workspaceRepository;
 
     public SignUpCommandHandler(
         IUserRepository userRepository,
         IPasswordHasher passwordHasher,
         IDateTimeProvider dateTimeProvider,
         IUnitOfWork unitOfWork,
-        IUserProfileRepository userProfileRepository)
+        IUserProfileRepository userProfileRepository,
+        IWorkspaceRepository workspaceRepository)
     {
         _userRepository = userRepository;
         _passwordHasher = passwordHasher;
         _dateTimeProvider = dateTimeProvider;
         _unitOfWork = unitOfWork;
         _userProfileRepository = userProfileRepository;
+        _workspaceRepository = workspaceRepository;
     }
 
     public async Task<AuthResultDto> Handle(SignUpCommand request, CancellationToken cancellationToken)
@@ -87,11 +92,20 @@ public sealed class SignUpCommandHandler : IRequestHandler<SignUpCommand, AuthRe
         user.SetPasswordHash(passwordHash, isPasswordAutoset: false, now);
         user.RecordSuccessfulLogin(now, "email", request.IpAddress, request.UserAgent);
 
-        await _userRepository.AddAsync(user, cancellationToken);
-
-        // Create a default user profile similar to Plane's behavior
         var profile = UserProfile.Create(Guid.NewGuid(), user.Id, StructuredData.FromJson(null));
+
+        // Create a default workspace and member
+        var workspaceName = $"{user.DisplayName.ToLower()}'s workspace";
+        var workspaceSlug = Slug.Create(workspaceName.ToSlug());
+        var workspace = Workspace.Create(Guid.NewGuid(), workspaceName, user.Id, workspaceSlug, "UTC");
+
+        // Set the user's last workspace ID on their profile
+        profile.UpdateBilling(workspace.Id, profile.BillingAddress, profile.BillingAddressCountry, profile.HasBillingAddress);
+
+        // Add all entities to be tracked
+        await _userRepository.AddAsync(user, cancellationToken);
         await _userProfileRepository.AddAsync(profile, cancellationToken);
+        await _workspaceRepository.AddAsync(workspace, cancellationToken);
 
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
@@ -102,6 +116,7 @@ public sealed class SignUpCommandHandler : IRequestHandler<SignUpCommand, AuthRe
             DisplayName = user.DisplayName,
             LastLoginAt = user.LastLoginTime,
             IsPasswordAutoset = user.IsPasswordAutoset,
+            LastWorkspaceId = profile.LastWorkspaceId
         };
     }
 }

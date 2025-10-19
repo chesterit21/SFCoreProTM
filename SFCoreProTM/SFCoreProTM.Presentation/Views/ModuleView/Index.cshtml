@@ -1,0 +1,142 @@
+@{
+    ViewData["Title"] = "Modules";
+    Layout = "~/Views/Shared/_LayoutApp.cshtml";
+    var projectId = ViewBag.ProjectId as Guid?;
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h3 class="card-title">Modules</h3>
+                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createModuleModal" id="createModuleBtn">
+                            <i class="fas fa-plus"></i> Create Module
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div id="modulesList">
+                        <!-- Modules will be loaded here by JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Create Modal -->
+<div class="modal fade" id="createModuleModal" tabindex="-1" aria-labelledby="createModuleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="createModuleModalLabel">Create Module</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Create form will be loaded here by JavaScript -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Modal -->
+<div class="modal fade" id="editModuleModal" tabindex="-1" aria-labelledby="editModuleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editModuleModalLabel">Edit Module</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Edit form will be loaded here by JavaScript -->
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Load modules when page loads
+            loadModules();
+            
+            // Load create modal content when create button is clicked
+            $('#createModuleBtn').click(function() {
+                loadCreateModal();
+            });
+        });
+        
+        function loadModules() {
+            $.get(`/api/projects/${'@projectId'}/modules`, function(data) {
+                let modulesHtml = '';
+                if (data.length > 0) {
+                    modulesHtml = '<div class="row">';
+                    data.forEach(function(module) {
+                        modulesHtml += `
+                            <div class="col-md-4 mb-3">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h5 class="card-title">${module.name}</h5>
+                                        <p class="card-text">${module.description}</p>
+                                        <p class="card-text"><small class="text-muted">Sort Order: ${module.sortOrder}</small></p>
+                                        <button class="btn btn-sm btn-outline-primary edit-module-btn" data-module-id="${module.id}">Edit</button>
+                                        <button class="btn btn-sm btn-outline-danger delete-module-btn" data-module-id="${module.id}">Delete</button>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    modulesHtml += '</div>';
+                } else {
+                    modulesHtml = '<p>No modules found.</p>';
+                }
+                
+                $('#modulesList').html(modulesHtml);
+                
+                // Attach event handlers for edit buttons
+                $('.edit-module-btn').click(function() {
+                    const moduleId = $(this).data('module-id');
+                    loadEditModal(moduleId);
+                });
+                
+                // Attach event handlers for delete buttons
+                $('.delete-module-btn').click(function() {
+                    const moduleId = $(this).data('module-id');
+                    deleteModule(moduleId);
+                });
+            });
+        }
+        
+        function loadCreateModal() {
+            $.get(`/ModuleView/CreateModal?projectId=${'@projectId'}`, function(data) {
+                $('#createModuleModal .modal-body').html(data);
+                $('#createModuleModal').modal('show');
+            });
+        }
+        
+        function loadEditModal(moduleId) {
+            $.get(`/ModuleView/EditModal?projectId=${'@projectId'}&moduleId=${moduleId}`, function(data) {
+                $('#editModuleModal .modal-body').html(data);
+                $('#editModuleModal').modal('show');
+            });
+        }
+        
+        function deleteModule(moduleId) {
+            if (confirm('Are you sure you want to delete this module?')) {
+                $.ajax({
+                    url: `/api/projects/${'@projectId'}/modules/${moduleId}`,
+                    type: 'DELETE',
+                    success: function(result) {
+                        loadModules(); // Reload modules list
+                        alert('Module deleted successfully');
+                    },
+                    error: function(xhr, status, error) {
+                        alert('Error deleting module: ' + error);
+                    }
+                });
+            }
+        }
+    </script>
+}

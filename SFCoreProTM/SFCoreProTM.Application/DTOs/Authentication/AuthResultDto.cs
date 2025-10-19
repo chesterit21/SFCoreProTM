@@ -13,4 +13,5 @@ public sealed class AuthResultDto
     public DateTime? LastLoginAt { get; init; }
 
     public bool IsPasswordAutoset { get; init; }
+    public Guid? LastWorkspaceId { get; init; }
 }

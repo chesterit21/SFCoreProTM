@@ -1,0 +1,135 @@
+@{
+    var moduleId = ViewBag.ModuleId as Guid?;
+    var erdDefinitionId = ViewBag.ErdDefinitionId as Guid?;
+}
+
+<form id="editErdForm">
+    <input type="hidden" id="moduleId" name="moduleId" value="@moduleId" />
+    <input type="hidden" id="erdDefinitionId" name="erdDefinitionId" value="@erdDefinitionId" />
+    
+    <div class="mb-3">
+        <label for="tName" class="form-label">Table Name</label>
+        <input type="text" class="form-control" id="tName" name="tName" required>
+    </div>
+    
+    <div class="mb-3">
+        <label for="description" class="form-label">Description</label>
+        <textarea class="form-control" id="description" name="description" rows="3"></textarea>
+    </div>
+    
+    <div class="mb-3">
+        <label for="entityName" class="form-label">Entity Name</label>
+        <input type="text" class="form-control" id="entityName" name="entityName" required>
+    </div>
+    
+    <div class="mb-3">
+        <label for="attributeName" class="form-label">Attribute Name</label>
+        <input type="text" class="form-control" id="attributeName" name="attributeName" required>
+    </div>
+    
+    <div class="mb-3">
+        <label for="attributeType" class="form-label">Attribute Type</label>
+        <select class="form-select" id="attributeType" name="attributeType" required>
+            <option value="">Select Attribute Type</option>
+            <option value="string">String</option>
+            <option value="int">Integer</option>
+            <option value="bool">Boolean</option>
+            <option value="datetime">DateTime</option>
+            <option value="decimal">Decimal</option>
+            <option value="guid">Guid</option>
+        </select>
+    </div>
+    
+    <div class="mb-3">
+        <label for="maxChar" class="form-label">Max Characters</label>
+        <input type="text" class="form-control" id="maxChar" name="maxChar">
+    </div>
+    
+    <div class="mb-3">
+        <label for="sortOrder" class="form-label">Sort Order</label>
+        <input type="number" class="form-control" id="sortOrder" name="sortOrder" value="1" min="1">
+    </div>
+    
+    <div class="mb-3 form-check">
+        <input type="checkbox" class="form-check-input" id="isPrimaryKey" name="isPrimaryKey">
+        <label class="form-check-label" for="isPrimaryKey">Is Primary Key</label>
+    </div>
+    
+    <div class="mb-3 form-check">
+        <input type="checkbox" class="form-check-input" id="isAcceptNull" name="isAcceptNull">
+        <label class="form-check-label" for="isAcceptNull">Accept Null</label>
+    </div>
+    
+    <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="submit" class="btn btn-primary" id="editErdSubmitBtn">Update</button>
+    </div>
+</form>
+
+<script>
+    // Load ERD definition data when modal is shown
+    document.addEventListener('DOMContentLoaded', function() {
+        const erdId = document.getElementById('erdDefinitionId').value;
+        
+        fetch(`/api/modules/${'@moduleId'}/erd-definitions`)
+            .then(response => response.json())
+            .then(data => {
+                const erd = data.find(e => e.id === erdId);
+                if (erd) {
+                    document.getElementById('tName').value = erd.tName;
+                    document.getElementById('description').value = erd.description;
+                    document.getElementById('entityName').value = erd.entityName;
+                    document.getElementById('attributeName').value = erd.attributeName;
+                    document.getElementById('attributeType').value = erd.attributeType;
+                    document.getElementById('maxChar').value = erd.maxChar;
+                    document.getElementById('sortOrder').value = erd.sortOrder;
+                    document.getElementById('isPrimaryKey').checked = erd.isPrimaryKey;
+                    document.getElementById('isAcceptNull').checked = erd.isAcceptNull;
+                }
+            })
+            .catch(error => console.error('Error loading ERD definition data:', error));
+    });
+    
+    document.getElementById('editErdForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const formData = {
+            moduleId: document.getElementById('moduleId').value,
+            tName: document.getElementById('tName').value,
+            description: document.getElementById('description').value,
+            entityName: document.getElementById('entityName').value,
+            attributeName: document.getElementById('attributeName').value,
+            attributeType: document.getElementById('attributeType').value,
+            maxChar: document.getElementById('maxChar').value,
+            sortOrder: parseInt(document.getElementById('sortOrder').value),
+            isPrimaryKey: document.getElementById('isPrimaryKey').checked,
+            isAcceptNull: document.getElementById('isAcceptNull').checked
+        };
+        
+        const erdId = document.getElementById('erdDefinitionId').value;
+        
+        fetch(`/api/modules/${formData.moduleId}/erd-definitions/${erdId}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(formData)
+        })
+        .then(response => {
+            if (response.ok) {
+                return response.json();
+            } else {
+                throw new Error('Failed to update ERD definition');
+            }
+        })
+        .then(result => {
+            var editModal = bootstrap.Modal.getInstance(document.getElementById('editErdModal'));
+            editModal.hide();
+            loadErdDefinitions(); // Reload ERD definitions list
+            alert('ERD definition updated successfully');
+        })
+        .catch(error => {
+            alert('Error updating ERD definition: ' + error.message);
+        });
+    });
+</script>

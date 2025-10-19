@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using SFCoreProTM.Application.Interfaces;
+using SFCoreProTM.Application.Interfaces.Data;
 using SFCoreProTM.Application.Interfaces.Repositories;
 using SFCoreProTM.Application.Interfaces.Security;
 using SFCoreProTM.Persistence.Data;
@@ -29,22 +30,18 @@ public static class ServiceCollectionExtensions
         });
 
         services.AddScoped<IUnitOfWork, UoW.UnitOfWork>();
-        services.AddScoped<IWorkItemReadService, WorkItemReadService>();
-        services.AddScoped<IIssueSequenceService, IssueSequenceService>();
-        services.AddScoped<IIssueRepository, IssueRepository>();
-        services.AddScoped<IIssueCommentRepository, IssueCommentRepository>();
-        services.AddScoped<IIssueVersionRepository, IssueVersionRepository>();
-        services.AddScoped<IIssueDescriptionVersionRepository, IssueDescriptionVersionRepository>();
-        services.AddScoped<IWorkspaceReadService, WorkspaceReadService>();
         services.AddScoped<IProjectRepository, ProjectRepository>();
-        services.AddScoped<IStateRepository, StateRepository>();
-        services.AddScoped<ILabelRepository, LabelRepository>();
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IUserProfileRepository, UserProfileRepository>();
-        services.AddScoped<IWorkspaceInviteRepository, WorkspaceInviteRepository>();
-        services.AddScoped<IProjectInviteRepository, ProjectInviteRepository>();
+        services.AddScoped<IWorkspaceRepository, WorkspaceRepository>();
+        services.AddScoped<IModuleRepository, ModuleRepository>();
+        services.AddScoped<ITaskRepository, TaskRepository>();
+        services.AddScoped<IErdDefinitionRepository, ErdDefinitionRepository>();
+        services.AddScoped<ISprintPlanningRepository, SprintPlanningRepository>();
+        services.AddScoped<IFlowTaskRepository, FlowTaskRepository>();
         services.AddSingleton<IDateTimeProvider, DateTimeProvider>();
         services.AddSingleton<IPasswordHasher, BcryptPasswordHasher>();
+        services.AddSingleton<ISqlConnectionFactory, SqlConnectionFactory>();
 
         return services;
     }

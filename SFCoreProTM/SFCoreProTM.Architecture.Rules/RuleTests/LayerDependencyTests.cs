@@ -1,7 +1,7 @@
 using System.Reflection;
 using NetArchTest.Rules;
 using SFCoreProTM.Application.Interfaces;
-using SFCoreProTM.Domain.Entities.Issues;
+using SFCoreProTM.Domain.Entities.Users;
 using SFCoreProTM.Persistence.Data;
 using SFCoreProTM.Presentation.Controllers;
 using Xunit;
@@ -16,10 +16,10 @@ namespace SFCoreProTM.Architecture.Rules.RuleTests
         private const string PresentationNamespace = "SFCoreProTM.Presentation";
 
         // Dapatkan semua Assembly dari class tertentu di setiap proyek
-        private static readonly Assembly DomainAssembly = typeof(Issue).Assembly;
+        private static readonly Assembly DomainAssembly = typeof(User).Assembly;
         private static readonly Assembly ApplicationAssembly = typeof(IUnitOfWork).Assembly;
         private static readonly Assembly PersistenceAssembly = typeof(ApplicationDbContext).Assembly;
-        private static readonly Assembly PresentationAssembly = typeof(IssuesController).Assembly;
+        private static readonly Assembly PresentationAssembly = typeof(AuthController).Assembly;
 
         [Fact]
         public void Domain_Layer_Should_Not_Have_Dependency_On_Other_Layers()

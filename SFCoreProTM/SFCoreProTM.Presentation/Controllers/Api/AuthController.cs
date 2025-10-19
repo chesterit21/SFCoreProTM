@@ -11,8 +11,9 @@ using SFCoreProTM.Application.Mapping.Requests.Authentication;
 using SFCoreProTM.Presentation.Models.Authentication;
 using SFCoreProTM.Presentation.Options;
 using SFCoreProTM.Presentation.Services;
-using SFCoreProTM.Application.Features.Invites.Queries.GetWorkspaceInviteByToken;
-using SFCoreProTM.Application.Features.Invites.Commands.AcceptWorkspaceInvite;
+using Microsoft.Extensions.Logging;
+using System.IdentityModel.Tokens.Jwt;
+using System.Text;
 
 namespace SFCoreProTM.Presentation.Controllers;
 
@@ -24,13 +25,15 @@ public sealed class AuthController : ControllerBase
     private readonly IJwtTokenService _jwt;
     private readonly JwtOptions _jwtOptions;
     private readonly InstanceOptions _instanceOptions;
+    private readonly ILogger<AuthController> _logger;
 
-    public AuthController(IMediator mediator, IJwtTokenService jwt, IOptions<JwtOptions> jwtOptions, IOptions<InstanceOptions> instanceOptions)
+    public AuthController(IMediator mediator, IJwtTokenService jwt, IOptions<JwtOptions> jwtOptions, IOptions<InstanceOptions> instanceOptions, ILogger<AuthController> logger)
     {
         _mediator = mediator;
         _jwt = jwt;
         _jwtOptions = jwtOptions.Value;
         _instanceOptions = instanceOptions.Value;
+        _logger = logger;
     }
 
     [HttpPost("login")]
@@ -55,7 +58,14 @@ public sealed class AuthController : ControllerBase
 
         var result = await _mediator.Send(command, cancellationToken);
 
-        var (token, expiresAt) = _jwt.CreateToken(result.UserId, result.Email, result.DisplayName);
+        _logger.LogInformation("Login berhasil untuk pengguna {UserId} dengan email {Email}", result.UserId, result.Email);
+        _logger.LogInformation("LastWorkspaceId: {LastWorkspaceId}", result.LastWorkspaceId);
+
+        var (token, expiresAt) = _jwt.CreateToken(result.UserId, result.Email, result.DisplayName, result.LastWorkspaceId);
+        
+        // Logging tambahan untuk memastikan token dibuat dengan klaim yang benar
+        LogTokenClaims(token);
+        
         SetAuthCookie(token, expiresAt, request.RememberMe);
 
         var response = new AuthResponse
@@ -118,17 +128,6 @@ public sealed class AuthController : ControllerBase
                 return Forbid();
             }
             inviteTokenGuid = parsed;
-
-            var inviteInfo = await _mediator.Send(new GetWorkspaceInviteByTokenQuery(parsed), cancellationToken);
-            if (inviteInfo is null || inviteInfo.Accepted)
-            {
-                return Forbid();
-            }
-            // Optional: ensure email matches invite
-            if (!string.Equals(inviteInfo.Email, request.Email, StringComparison.OrdinalIgnoreCase))
-            {
-                return Forbid();
-            }
         }
 
         var command = new SignUpCommand(
@@ -142,21 +141,13 @@ public sealed class AuthController : ControllerBase
 
         var result = await _mediator.Send(command, cancellationToken);
 
-        if (inviteTokenGuid.HasValue)
-        {
-            // Try to accept the workspace invite and add membership
-            try
-            {
-                await _mediator.Send(new AcceptWorkspaceInviteCommand(inviteTokenGuid.Value, result.UserId), cancellationToken);
-            }
-            catch
-            {
-                // ignore and continue to sign-in; the guard above already validated
-            }
-        }
 
         // Immediately sign the user in
-        var (token, expiresAt) = _jwt.CreateToken(result.UserId, result.Email, result.DisplayName);
+        var (token, expiresAt) = _jwt.CreateToken(result.UserId, result.Email, result.DisplayName, result.LastWorkspaceId);
+        
+        // Logging tambahan untuk memastikan token dibuat dengan klaim yang benar
+        LogTokenClaims(token);
+        
         SetAuthCookie(token, expiresAt, rememberMe: true);
 
         var response = new AuthResponse
@@ -184,5 +175,27 @@ public sealed class AuthController : ControllerBase
             IsEssential = true,
         };
         Response.Cookies.Append(_jwtOptions.CookieName, token, cookieOptions);
+        
+        // Logging untuk memastikan cookie diset dengan benar
+        _logger.LogInformation("Auth cookie diset dengan nama {CookieName}", _jwtOptions.CookieName);
+    }
+    
+    private void LogTokenClaims(string token)
+    {
+        try
+        {
+            var handler = new JwtSecurityTokenHandler();
+            var jsonToken = handler.ReadJwtToken(token);
+            
+            _logger.LogInformation("Token klaim:");
+            foreach (var claim in jsonToken.Claims)
+            {
+                _logger.LogInformation("  {ClaimType}: {ClaimValue}", claim.Type, claim.Value);
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Gagal membaca klaim token");
+        }
     }
 }

@@ -207,62 +207,62 @@ public sealed class UserProfile : Entity
 
     public Guid UserId { get; private set; }
 
-    public StructuredData Theme { get; private set; } = StructuredData.FromJson(null);
+    public StructuredData? Theme { get; private set; } = StructuredData.FromJson(null);
 
-    public bool IsAppRailDocked { get; private set; } = true;
+    public bool? IsAppRailDocked { get; private set; } = true;
 
-    public bool IsTourCompleted { get; private set; }
+    public bool? IsTourCompleted { get; private set; }
 
-    public StructuredData OnboardingStep { get; private set; } = StructuredData.FromJson(null);
+    public StructuredData? OnboardingStep { get; private set; } = StructuredData.FromJson(null);
 
     public string? UseCase { get; private set; }
 
     public string? Role { get; private set; }
 
-    public bool IsOnboarded { get; private set; }
+    public bool? IsOnboarded { get; private set; }
 
     public Guid? LastWorkspaceId { get; private set; }
 
-    public string? BillingAddressCountry { get; private set; }
+    public string? BillingAddressCountry { get; private set; } = "Indonesia";
 
-    public StructuredData BillingAddress { get; private set; } = StructuredData.FromJson(null);
+    public StructuredData? BillingAddress { get; private set; } = StructuredData.FromJson(null);
 
-    public bool HasBillingAddress { get; private set; }
+    public bool? HasBillingAddress { get; private set; } = false;
 
     public string? CompanyName { get; private set; }
 
-    public bool IsSmoothCursorEnabled { get; private set; }
+    public bool? IsSmoothCursorEnabled { get; private set; }
 
-    public bool IsMobileOnboarded { get; private set; }
+    public bool? IsMobileOnboarded { get; private set; }
 
-    public StructuredData MobileOnboardingStep { get; private set; } = StructuredData.FromJson(null);
+    public StructuredData? MobileOnboardingStep { get; private set; } = StructuredData.FromJson(null);
 
-    public bool MobileTimezoneAutoSet { get; private set; }
+    public bool? MobileTimezoneAutoSet { get; private set; }
 
-    public string? Language { get; private set; }
+    public string? Language { get; private set; } = "id";
 
-    public int StartOfTheWeek { get; private set; } = 0;
+    public int? StartOfTheWeek { get; private set; } = 0;
 
-    public StructuredData Goals { get; private set; } = StructuredData.FromJson(null);
+    public StructuredData? Goals { get; private set; } = StructuredData.FromJson(null);
 
-    public ColorCode BackgroundColor { get; private set; } = ColorCode.FromHex("#FFFFFF");
+    public ColorCode? BackgroundColor { get; private set; } = ColorCode.FromHex("#FFFFFF");
 
-    public bool HasMarketingEmailConsent { get; private set; }
+    public bool? HasMarketingEmailConsent { get; private set; } = false;
 
-    public bool HasAppRailDocked => IsAppRailDocked;
+    public bool? HasAppRailDocked => IsAppRailDocked;
 
     public static UserProfile Create(Guid id, Guid userId, StructuredData theme)
     {
         return new UserProfile(id, userId, theme);
     }
 
-    public void UpdateTheme(StructuredData theme, ColorCode backgroundColor)
+    public void UpdateTheme(StructuredData? theme, ColorCode? backgroundColor)
     {
         Theme = theme;
         BackgroundColor = backgroundColor;
     }
 
-    public void UpdateOnboarding(bool isTourCompleted, bool isOnboarded, StructuredData onboardingStep, StructuredData mobileOnboardingStep)
+    public void UpdateOnboarding(bool isTourCompleted, bool isOnboarded, StructuredData? onboardingStep, StructuredData? mobileOnboardingStep)
     {
         IsTourCompleted = isTourCompleted;
         IsOnboarded = isOnboarded;
@@ -270,7 +270,7 @@ public sealed class UserProfile : Entity
         MobileOnboardingStep = mobileOnboardingStep;
     }
 
-    public void UpdatePreferences(bool isAppRailDocked, bool isSmoothCursorEnabled, bool hasMarketingEmailConsent, bool mobileTimezoneAutoSet, int startOfTheWeek, string? language)
+    public void UpdatePreferences(bool? isAppRailDocked, bool? isSmoothCursorEnabled, bool? hasMarketingEmailConsent, bool? mobileTimezoneAutoSet, int? startOfTheWeek, string? language)
     {
         IsAppRailDocked = isAppRailDocked;
         IsSmoothCursorEnabled = isSmoothCursorEnabled;
@@ -287,7 +287,7 @@ public sealed class UserProfile : Entity
         CompanyName = companyName;
     }
 
-    public void UpdateBilling(Guid? lastWorkspaceId, StructuredData billingAddress, string? billingCountry, bool hasBillingAddress)
+    public void UpdateBilling(Guid? lastWorkspaceId, StructuredData? billingAddress, string? billingCountry, bool? hasBillingAddress)
     {
         LastWorkspaceId = lastWorkspaceId;
         BillingAddress = billingAddress;
@@ -334,7 +334,7 @@ public sealed class Account : Entity
 
     public string? IdToken { get; private set; }
 
-    public StructuredData Metadata { get; private set; } = StructuredData.FromJson(null);
+    public StructuredData? Metadata { get; private set; } = StructuredData.FromJson(null);
 
     public static Account Create(Guid id, Guid userId, string providerAccountId, string provider, string accessToken)
     {

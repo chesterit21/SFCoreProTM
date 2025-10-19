@@ -1,0 +1,85 @@
+@{
+    var projectId = ViewBag.ProjectId as Guid?;
+}
+
+<form id="createModuleForm">
+    <input type="hidden" id="projectId" name="projectId" value="@projectId" />
+    <input type="hidden" id="workspaceId" name="workspaceId" value="" />
+    
+    <div class="mb-3">
+        <label for="name" class="form-label">Name</label>
+        <input type="text" class="form-control" id="name" name="name" required>
+    </div>
+    
+    <div class="mb-3">
+        <label for="description" class="form-label">Description</label>
+        <div id="moduleDescriptionEditor" class="border rounded" style="min-height: 150px;"></div>
+        <input type="hidden" id="description" name="description" />
+    </div>
+    
+    <div class="mb-3">
+        <label for="sortOrder" class="form-label">Sort Order</label>
+        <input type="number" class="form-control" id="sortOrder" name="sortOrder" value="1" min="1">
+    </div>
+    
+    <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="submit" class="btn btn-primary" id="createModuleSubmitBtn">Create</button>
+    </div>
+</form>
+
+<script src="https://cdn.jsdelivr.net/npm/@("@")editorjs/editorjs@latest"></script>
+<script src="https://cdn.jsdelivr.net/npm/@("@")editorjs/header@latest"></script>
+<script src="https://cdn.jsdelivr.net/npm/@("@")editorjs/list@latest"></script>
+<script src="https://cdn.jsdelivr.net/npm/@("@")editorjs/paragraph@latest"></script>
+<script type="module">
+    import { initializeEditor, getEditorPlainText } from '/js/editor.js';
+    
+    // Inisialisasi Editor.js
+    let moduleEditor;
+    
+    // Tunggu sampai DOM selesai dimuat
+    document.addEventListener('DOMContentLoaded', function() {
+        moduleEditor = initializeEditor('moduleDescriptionEditor');
+    });
+    
+    // Get workspace ID from some global variable or API call
+    // For now, we'll leave it empty and you can implement as needed
+    $('#workspaceId').val(''); // You need to set this appropriately
+    
+    $('#createModuleForm').submit(async function(e) {
+        e.preventDefault();
+        
+        // Simpan konten editor ke input tersembunyi
+        if (moduleEditor) {
+            const plainText = await getEditorPlainText(moduleEditor);
+            $('#description').val(plainText);
+        }
+        
+        const formData = {
+            projectId: $('#projectId').val(),
+            workspaceId: $('#workspaceId').val(),
+            name: $('#name').val(),
+            description: $('#description').val(),
+            sortOrder: parseInt($('#sortOrder').val())
+        };
+        
+        $.ajax({
+            url: `/api/projects/${formData.projectId}/modules`,
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(formData),
+            success: function(result) {
+                // Reset form and close modal
+                $('#createModuleForm')[0].reset();
+                $('#createModuleModal').modal('hide');
+                
+                // Reload modules
+                loadModules();
+            },
+            error: function(xhr, status, error) {
+                alert('Error creating module: ' + xhr.responseText);
+            }
+        });
+    });
+</script>

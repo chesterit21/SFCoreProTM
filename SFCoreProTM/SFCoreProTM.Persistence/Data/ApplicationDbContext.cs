@@ -1,10 +1,10 @@
 using Microsoft.EntityFrameworkCore;
 using SFCoreProTM.Domain.Entities;
-using SFCoreProTM.Domain.Entities.Issues;
 using SFCoreProTM.Domain.Entities.Projects;
 using SFCoreProTM.Domain.Entities.Users;
 using SFCoreProTM.Domain.Entities.Workspaces;
 using SFCoreProTM.Domain.ValueObjects;
+using TaskEntity = SFCoreProTM.Domain.Entities.Projects.Task;
 
 namespace SFCoreProTM.Persistence.Data;
 
@@ -15,27 +15,15 @@ public class ApplicationDbContext : DbContext
     {
     }
 
-    public DbSet<Issue> Issues => Set<Issue>();
-    public DbSet<IssueAssignee> IssueAssignees => Set<IssueAssignee>();
-    public DbSet<IssueLabel> IssueLabels => Set<IssueLabel>();
-    public DbSet<IssueComment> IssueComments => Set<IssueComment>();
-    public DbSet<IssueVersion> IssueVersions => Set<IssueVersion>();
-    public DbSet<IssueDescriptionVersion> IssueDescriptionVersions => Set<IssueDescriptionVersion>();
     public DbSet<Project> Projects => Set<Project>();
-    public DbSet<ProjectMember> ProjectMembers => Set<ProjectMember>();
-    public DbSet<State> States => Set<State>();
-    public DbSet<Label> Labels => Set<Label>();
-    public DbSet<EstimatePoint> EstimatePoints => Set<EstimatePoint>();
-    public DbSet<IssueType> IssueTypes => Set<IssueType>();
-    public DbSet<ProjectIssueType> ProjectIssueTypes => Set<ProjectIssueType>();
-    public DbSet<IssueUserProperty> IssueUserProperties => Set<IssueUserProperty>();
-    public DbSet<ProjectIdentifier> ProjectIdentifiers => Set<ProjectIdentifier>();
+    public DbSet<Module> Modules => Set<Module>();
+    public DbSet<TaskEntity> Tasks => Set<TaskEntity>();
+    public DbSet<ErdDefinition> ErdDefinitions => Set<ErdDefinition>();
+    public DbSet<SprintPlanning> SprintPlannings => Set<SprintPlanning>();
+    public DbSet<FlowTask> FlowTasks => Set<FlowTask>();
     public DbSet<Workspace> Workspaces => Set<Workspace>();
-    public DbSet<WorkspaceMember> WorkspaceMembers => Set<WorkspaceMember>();
     public DbSet<User> Users => Set<User>();
     public DbSet<UserProfile> UserProfiles => Set<UserProfile>();
-    public DbSet<WorkspaceMemberInvite> WorkspaceMemberInvites => Set<WorkspaceMemberInvite>();
-    public DbSet<ProjectMemberInvite> ProjectMemberInvites => Set<ProjectMemberInvite>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -70,8 +58,7 @@ public class ApplicationDbContext : DbContext
         modelBuilder.Ignore<ColorCode>();
         modelBuilder.Ignore<EmailAddress>();
         modelBuilder.Ignore<Url>();
-        modelBuilder.Ignore<WorkspaceMemberPreferences>();
-        modelBuilder.Ignore<ProjectMemberPreferences>();
+        //modelBuilder.Ignore<ProjectMemberPreferences>();
 
         base.OnModelCreating(modelBuilder);
     }

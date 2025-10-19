@@ -1,15 +1,21 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
+using SFCoreProTM.Application.Interfaces.Repositories;
+using SFCoreProTM.Persistence.Repositories;
 
-namespace SFCoreProTM.Presentation.Extensions
+namespace SFCoreProTM.Presentation.Extensions;
+
+public static class ServiceCollectionExtensions
 {
-    /// <summary>
-    /// Tempat mendaftarkan semua service/repository/middleware
-    /// </summary>
-    public class ServiceCollectionExtensions
+    public static IServiceCollection AddApplicationServices(this IServiceCollection services)
     {
+        // Register repositories
+        services.AddScoped<IProjectRepository, ProjectRepository>();
+        services.AddScoped<IModuleRepository, ModuleRepository>();
+        services.AddScoped<ITaskRepository, TaskRepository>();
+        services.AddScoped<IErdDefinitionRepository, ErdDefinitionRepository>();
+        services.AddScoped<ISprintPlanningRepository, SprintPlanningRepository>();
+        services.AddScoped<IFlowTaskRepository, FlowTaskRepository>();
         
+        return services;
     }
 }

@@ -1,0 +1,214 @@
+@{
+    ViewData["Title"] = "Flow Tasks";
+    Layout = "~/Views/Shared/_LayoutApp.cshtml";
+    var taskId = ViewBag.TaskId as Guid?;
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h3 class="card-title">Flow Tasks</h3>
+                        <button type="button" class="btn btn-primary" id="createFlowTaskBtn">
+                            <i class="fas fa-plus"></i> Create Flow Task
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div id="flowTasksList">
+                        <!-- Flow Tasks will be loaded here by JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Create Modal -->
+<div class="modal fade" id="createFlowTaskModal" tabindex="-1" aria-labelledby="createFlowTaskModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="createFlowTaskModalLabel">Create Flow Task</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Create form will be loaded here by JavaScript -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Modal -->
+<div class="modal fade" id="editFlowTaskModal" tabindex="-1" aria-labelledby="editFlowTaskModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editFlowTaskModalLabel">Edit Flow Task</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Edit form will be loaded here by JavaScript -->
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Load flow tasks when page loads
+            loadFlowTasks();
+            
+            // Load create modal content when create button is clicked
+            document.getElementById('createFlowTaskBtn').addEventListener('click', function() {
+                loadCreateModal();
+            });
+        });
+        
+        function loadFlowTasks() {
+            fetch(`/api/tasks/${'@taskId'}/flow-tasks`)
+                .then(response => response.json())
+                .then(data => {
+                    let flowHtml = '';
+                    if (data.length > 0) {
+                        flowHtml = '<div class="table-responsive"><table class="table table-bordered table-striped">';
+                        flowHtml += '<thead><tr><th>Name</th><th>Description</th><th>Sort Order</th><th>Status</th><th>Actions</th></tr></thead><tbody>';
+                        data.forEach(function(flow) {
+                            const statusText = getStatusText(flow.flowStatus);
+                            const statusClass = getStatusClass(flow.flowStatus);
+                            
+                            flowHtml += `<tr>
+                                <td>${flow.name}</td>
+                                <td>${flow.description}</td>
+                                <td>${flow.sortOrder}</td>
+                                <td><span class="badge ${statusClass}">${statusText}</span></td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-primary edit-flow-btn" data-flow-id="${flow.id}">Edit</button>
+                                    <button class="btn btn-sm btn-outline-danger delete-flow-btn" data-flow-id="${flow.id}">Delete</button>
+                                    <button class="btn btn-sm btn-outline-success run-flow-btn" data-flow-id="${flow.id}">Run</button>
+                                </td>
+                            </tr>`;
+                        });
+                        flowHtml += '</tbody></table></div>';
+                    } else {
+                        flowHtml = '<p>No flow tasks found.</p>';
+                    }
+                    
+                    document.getElementById('flowTasksList').innerHTML = flowHtml;
+                    
+                    // Attach event handlers for edit buttons
+                    document.querySelectorAll('.edit-flow-btn').forEach(button => {
+                        button.addEventListener('click', function() {
+                            const flowId = this.getAttribute('data-flow-id');
+                            loadEditModal(flowId);
+                        });
+                    });
+                    
+                    // Attach event handlers for delete buttons
+                    document.querySelectorAll('.delete-flow-btn').forEach(button => {
+                        button.addEventListener('click', function() {
+                            const flowId = this.getAttribute('data-flow-id');
+                            deleteFlowTask(flowId);
+                        });
+                    });
+                    
+                    // Attach event handlers for run buttons
+                    document.querySelectorAll('.run-flow-btn').forEach(button => {
+                        button.addEventListener('click', function() {
+                            const flowId = this.getAttribute('data-flow-id');
+                            runFlowTask(flowId);
+                        });
+                    });
+                })
+                .catch(error => console.error('Error loading flow tasks:', error));
+        }
+        
+        function getStatusText(status) {
+            switch(status) {
+                case 0: return 'In Progress';
+                case 1: return 'Done';
+                case 2: return 'Canceled';
+                case 3: return 'Pause';
+                default: return 'Unknown';
+            }
+        }
+        
+        function getStatusClass(status) {
+            switch(status) {
+                case 0: return 'bg-primary';
+                case 1: return 'bg-success';
+                case 2: return 'bg-danger';
+                case 3: return 'bg-warning';
+                default: return 'bg-secondary';
+            }
+        }
+        
+        function loadCreateModal() {
+            fetch(`/FlowTaskView/CreateModal?taskId=${'@taskId'}`)
+                .then(response => response.text())
+                .then(data => {
+                    document.querySelector('#createFlowTaskModal .modal-body').innerHTML = data;
+                    var createModal = new bootstrap.Modal(document.getElementById('createFlowTaskModal'));
+                    createModal.show();
+                })
+                .catch(error => console.error('Error loading create modal:', error));
+        }
+        
+        function loadEditModal(flowId) {
+            fetch(`/FlowTaskView/EditModal?taskId=${'@taskId'}&flowTaskId=${flowId}`)
+                .then(response => response.text())
+                .then(data => {
+                    document.querySelector('#editFlowTaskModal .modal-body').innerHTML = data;
+                    var editModal = new bootstrap.Modal(document.getElementById('editFlowTaskModal'));
+                    editModal.show();
+                })
+                .catch(error => console.error('Error loading edit modal:', error));
+        }
+        
+        function deleteFlowTask(flowId) {
+            if (confirm('Are you sure you want to delete this flow task?')) {
+                fetch(`/api/tasks/${'@taskId'}/flow-tasks/${flowId}`, {
+                    method: 'DELETE'
+                })
+                .then(response => {
+                    if (response.ok) {
+                        loadFlowTasks(); // Reload flow tasks list
+                        alert('Flow task deleted successfully');
+                    } else {
+                        throw new Error('Failed to delete flow task');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error deleting flow task:', error);
+                    alert('Error deleting flow task: ' + error.message);
+                });
+            }
+        }
+        
+        function runFlowTask(flowId) {
+            // Set flow task status to InProgress (0)
+            fetch(`/api/tasks/${'@taskId'}/flow-tasks/${flowId}/status`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(0) // InProgress status
+            })
+            .then(response => {
+                if (response.ok) {
+                    loadFlowTasks(); // Reload flow tasks list
+                    alert('Flow task is now running');
+                } else {
+                    throw new Error('Failed to run flow task');
+                }
+            })
+            .catch(error => {
+                console.error('Error running flow task:', error);
+                alert('Error running flow task: ' + error.message);
+            });
+        }
+    </script>
+}

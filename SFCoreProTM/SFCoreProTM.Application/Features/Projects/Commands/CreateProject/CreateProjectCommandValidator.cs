@@ -1,31 +1,48 @@
-using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 using FluentValidation;
+using SFCoreProTM.Application.Interfaces;
 
 namespace SFCoreProTM.Application.Features.Projects.Commands.CreateProject;
 
-public sealed class CreateProjectCommandValidator : AbstractValidator<CreateProjectCommand>
+public class CreateProjectCommandValidator : AbstractValidator<CreateProjectCommand>
 {
-    public CreateProjectCommandValidator()
+    private readonly IWorkspaceReadService _workspaceReadService;
+
+    public CreateProjectCommandValidator(IWorkspaceReadService workspaceReadService)
     {
-        RuleFor(command => command.WorkspaceId).NotEmpty();
-        RuleFor(command => command.ActorId).NotEmpty();
-        RuleFor(command => command.Payload).NotNull();
+        _workspaceReadService = workspaceReadService;
 
-        When(command => command.Payload is not null, () =>
-        {
-            RuleFor(command => command.Payload!.Name)
-                .NotEmpty()
-                .MaximumLength(255);
+        RuleFor(x => x.WorkspaceId)
+            .NotEmpty()
+            .MustAsync(WorkspaceMustExist)
+            .WithMessage("Workspace was not found.");
 
-            RuleFor(command => command.Payload.Identifier)
-                .NotEmpty()
-                .MaximumLength(12);
+        RuleFor(x => x.ActorId)
+            .NotEmpty()
+            .MustAsync(async (cmd, actorId, ctx, ct) => await ActorIsMember(cmd.WorkspaceId, actorId, ct))
+            .WithMessage("You must be a member of the workspace to create a project.");
 
-            RuleFor(command => command.Payload.ArchiveInMonths)
-                .InclusiveBetween(0, 12);
+        RuleFor(x => x.Payload.Name)
+            .NotEmpty()
+            .WithMessage("Project name is required.")
+            .MaximumLength(255)
+            .MustAsync(async (cmd, name, ctx, ct) => await NameIsUnique(cmd.WorkspaceId, name, ct))
+            .WithMessage(cmd => $"Project name '{cmd.Payload.Name.Trim()}' is already in use.");
+    }
 
-            RuleFor(command => command.Payload.CloseInMonths)
-                .InclusiveBetween(0, 12);
-        });
+    private async Task<bool> WorkspaceMustExist(System.Guid workspaceId, CancellationToken ct)
+    {
+        return await _workspaceReadService.WorkspaceExistsAsync(workspaceId, ct);
+    }
+
+    private async Task<bool> ActorIsMember(System.Guid workspaceId, System.Guid actorId, CancellationToken ct)
+    {
+        return await _workspaceReadService.IsMemberAsync(workspaceId, actorId, ct);
+    }
+
+    private async Task<bool> NameIsUnique(System.Guid workspaceId, string name, CancellationToken ct)
+    {
+        return !await _workspaceReadService.ProjectNameExistsAsync(workspaceId, name.Trim(), ct);
     }
 }

@@ -1,5 +1,5 @@
 ﻿@* Views/ProjectsMenu/Index.cshtml *@
-@* @model IEnumerable<SFCoreProTM.Application.DTOs.Projects.ProjectDto> // Model jika menampilkan daftar proyek *@
+@model IEnumerable<SFCoreProTM.Application.DTOs.Projects.ProjectSummaryDto> // Model jika menampilkan daftar proyek *@
 @{
     ViewData["Title"] = "Projects";
     Layout = "~/Views/Shared/_LayoutApp.cshtml"; 
@@ -32,17 +32,17 @@
 {
     <div class="list-group">
          @* Loop melalui Model untuk menampilkan proyek *@
-         @* foreach (var project in Model)
+         @foreach(var project in Model)
          {
              <a href="#" class="list-group-item list-group-item-action">
                  <div class="d-flex w-100 justify-content-between">
-                   <h5 class="mb-1">@project.Name (@project.Identifier)</h5>
-                   <small>@project.Visibility</small>
+                   <h5 class="mb-1">@project.Name </h5>
+                   @* <small>@project.Visibility</small> *@
                  </div>
                  <p class="mb-1">Optional description here...</p>
-                 <small>Lead: @project.ProjectLeadId ?? "N/A"</small>
+                 <small>Lead: @project.Description ?? "N/A"</small>
              </a>
-         } *@
+         }
     </div>
 }
 else

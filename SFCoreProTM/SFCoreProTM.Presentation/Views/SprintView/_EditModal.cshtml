@@ -1,0 +1,106 @@
+@{
+    var moduleId = ViewBag.ModuleId as Guid?;
+    var sprintPlanningId = ViewBag.SprintPlanningId as Guid?;
+}
+
+<form id="editSprintForm">
+    <input type="hidden" id="moduleId" name="moduleId" value="@moduleId" />
+    <input type="hidden" id="sprintPlanningId" name="sprintPlanningId" value="@sprintPlanningId" />
+    
+    <div class="mb-3">
+        <label for="name" class="form-label">Name</label>
+        <input type="text" class="form-control" id="name" name="name" required>
+    </div>
+    
+    <div class="mb-3">
+        <label for="description" class="form-label">Description</label>
+        <textarea class="form-control" id="description" name="description" rows="3"></textarea>
+    </div>
+    
+    <div class="mb-3">
+        <label for="startDate" class="form-label">Start Date</label>
+        <input type="date" class="form-control" id="startDate" name="startDate" required>
+    </div>
+    
+    <div class="mb-3">
+        <label for="targetDate" class="form-label">Target Date</label>
+        <input type="date" class="form-control" id="targetDate" name="targetDate" required>
+    </div>
+    
+    <div class="mb-3">
+        <label for="sortOrder" class="form-label">Sort Order</label>
+        <input type="number" class="form-control" id="sortOrder" name="sortOrder" value="1" min="1">
+    </div>
+    
+    <div class="mb-3">
+        <label for="note" class="form-label">Note</label>
+        <textarea class="form-control" id="note" name="note" rows="3"></textarea>
+    </div>
+    
+    <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="submit" class="btn btn-primary" id="editSprintSubmitBtn">Update</button>
+    </div>
+</form>
+
+<script>
+    // Load sprint planning data when modal is shown
+    document.addEventListener('DOMContentLoaded', function() {
+        const sprintId = document.getElementById('sprintPlanningId').value;
+        
+        fetch(`/api/modules/${'@moduleId'}/sprint-plannings`)
+            .then(response => response.json())
+            .then(data => {
+                const sprint = data.find(s => s.id === sprintId);
+                if (sprint) {
+                    document.getElementById('name').value = sprint.name;
+                    document.getElementById('description').value = sprint.description;
+                    document.getElementById('startDate').value = sprint.startDate.split('T')[0]; // Format date for input
+                    document.getElementById('targetDate').value = sprint.targetDate.split('T')[0]; // Format date for input
+                    document.getElementById('sortOrder').value = sprint.sortOrder;
+                    document.getElementById('note').value = sprint.note;
+                }
+            })
+            .catch(error => console.error('Error loading sprint planning data:', error));
+    });
+    
+    document.getElementById('editSprintForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const formData = {
+            moduleId: document.getElementById('moduleId').value,
+            name: document.getElementById('name').value,
+            description: document.getElementById('description').value,
+            startDate: document.getElementById('startDate').value,
+            targetDate: document.getElementById('targetDate').value,
+            sortOrder: parseInt(document.getElementById('sortOrder').value),
+            note: document.getElementById('note').value
+        };
+        
+        const sprintId = document.getElementById('sprintPlanningId').value;
+        
+        fetch(`/api/modules/${formData.moduleId}/sprint-plannings/${sprintId}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(formData)
+        })
+        .then(response => {
+            if (response.ok) {
+                return response.json();
+            } else {
+                throw new Error('Failed to update sprint planning');
+            }
+        })
+        .then(result => {
+            var editModal = bootstrap.Modal.getInstance(document.getElementById('editSprintModal'));
+            editModal.hide();
+            loadSprintPlannings(); // Reload sprint plannings list
+            alert('Sprint planning updated successfully');
+        })
+        .catch(error => {
+            alert('Error updating sprint planning: ' + error.message);
+        });
+    });
+</script>

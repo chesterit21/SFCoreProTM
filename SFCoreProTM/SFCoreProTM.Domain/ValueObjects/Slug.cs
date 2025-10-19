@@ -15,7 +15,7 @@ public sealed class Slug : ValueObject
 
     private Slug(string value)
     {
-        Value = value;
+        Value = value.ToLower();
     }
 
     public string Value { get; }
@@ -24,12 +24,12 @@ public sealed class Slug : ValueObject
     {
         ArgumentNullException.ThrowIfNull(value);
 
-        if (!SlugPattern.IsMatch(value))
+        if (!SlugPattern.IsMatch(value.ToLower()))
         {
             throw new ArgumentException("Slug must be lowercase alphanumeric words separated by hyphen.", nameof(value));
         }
 
-        return new Slug(value);
+        return new Slug(value.ToLower());
     }
 
     public override string ToString() => Value;

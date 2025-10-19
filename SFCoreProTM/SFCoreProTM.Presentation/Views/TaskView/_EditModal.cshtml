@@ -1,0 +1,119 @@
+@{
+    var moduleId = ViewBag.ModuleId as Guid?;
+    var taskId = ViewBag.TaskId as Guid?;
+}
+
+<form id="editTaskForm">
+    <input type="hidden" id="moduleId" name="moduleId" value="@moduleId" />
+    <input type="hidden" id="taskId" name="taskId" value="@taskId" />
+    <input type="hidden" id="projectId" name="projectId" value="" />
+    <input type="hidden" id="workspaceId" name="workspaceId" value="" />
+    
+    <div class="mb-3">
+        <label for="name" class="form-label">Name</label>
+        <input type="text" class="form-control" id="name" name="name" required>
+    </div>
+    
+    <div class="mb-3">
+        <label for="description" class="form-label">Description</label>
+        <div id="editTaskDescriptionEditor" class="border rounded" style="min-height: 150px;"></div>
+        <input type="hidden" id="description" name="description" />
+    </div>
+    
+    <div class="mb-3">
+        <label for="sortOrder" class="form-label">Sort Order</label>
+        <input type="number" class="form-control" id="sortOrder" name="sortOrder" value="1" min="1">
+    </div>
+    
+    <div class="mb-3 form-check">
+        <input type="checkbox" class="form-check-input" id="isErd" name="isErd">
+        <label class="form-check-label" for="isErd">Is ERD</label>
+    </div>
+    
+    <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="submit" class="btn btn-primary" id="editTaskSubmitBtn">Update</button>
+    </div>
+</form>
+
+<script src="https://cdn.jsdelivr.net/npm/@("@")editorjs/editorjs@latest"></script>
+<script src="https://cdn.jsdelivr.net/npm/@("@")editorjs/header@latest"></script>
+<script src="https://cdn.jsdelivr.net/npm/@("@")editorjs/list@latest"></script>
+<script src="https://cdn.jsdelivr.net/npm/@("@")editorjs/paragraph@latest"></script>
+<script type="module">
+    import { initializeEditor, getEditorPlainText } from '/js/editor.js';
+    
+    let editTaskEditor;
+    
+    // Load task data when modal is shown
+    document.addEventListener('DOMContentLoaded', function() {
+        const taskId = document.getElementById('taskId').value;
+        
+        fetch(`/api/modules/${'@moduleId'}/tasks`)
+            .then(response => response.json())
+            .then(data => {
+                const task = data.find(t => t.id === taskId);
+                if (task) {
+                    document.getElementById('name').value = task.name;
+                    document.getElementById('sortOrder').value = task.sortOrder;
+                    document.getElementById('isErd').checked = task.isErd;
+                    document.getElementById('projectId').value = task.projectId;
+                    document.getElementById('workspaceId').value = task.workspaceId;
+                    
+                    // Inisialisasi editor dengan konten yang ada
+                    editTaskEditor = initializeEditor('editTaskDescriptionEditor', {
+                        blocks: [
+                            {
+                                type: "paragraph",
+                                data: {
+                                    text: task.description || ""
+                                }
+                            }
+                        ]
+                    });
+                }
+            });
+    });
+    
+    document.getElementById('editTaskForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        // Simpan konten editor ke input tersembunyi
+        if (editTaskEditor) {
+            const plainText = await getEditorPlainText(editTaskEditor);
+            document.getElementById('description').value = plainText;
+        }
+        
+        const formData = {
+            moduleId: document.getElementById('moduleId').value,
+            taskId: document.getElementById('taskId').value,
+            projectId: document.getElementById('projectId').value,
+            workspaceId: document.getElementById('workspaceId').value,
+            name: document.getElementById('name').value,
+            description: document.getElementById('description').value,
+            sortOrder: parseInt(document.getElementById('sortOrder').value),
+            isErd: document.getElementById('isErd').checked
+        };
+        
+        fetch(`/api/modules/${formData.moduleId}/tasks/${formData.taskId}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(formData)
+        })
+        .then(response => response.json())
+        .then(data => {
+            // Close modal
+            const modal = bootstrap.Modal.getInstance(document.getElementById('editTaskModal'));
+            modal.hide();
+            
+            // Reload tasks
+            loadTasks();
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error updating task: ' + error.message);
+        });
+    });
+</script>

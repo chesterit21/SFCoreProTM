@@ -1,0 +1,187 @@
+@{
+    ViewData["Title"] = "Edit Project";
+    Layout = "~/Views/Shared/_LayoutApp.cshtml"; 
+    var workspaceId = ViewData["WorkspaceId"] as Guid?;
+    var projectId = ViewData["ProjectId"] as Guid?;
+}
+
+<h2>Edit Project</h2>
+<hr />
+
+<div class="row">
+    <div class="col-md-8">
+        <form id="editProjectForm">
+            @Html.AntiForgeryToken()
+
+            <div id="formErrorAlert" class="alert alert-danger d-none" role="alert"></div>
+            <div id="formSuccessAlert" class="alert alert-success d-none" role="alert"></div>
+
+            <div class="mb-3">
+                <label for="projectName" class="form-label fw-semibold">Name</label>
+                <input type="text" class="form-control" id="projectName" name="Name" required maxlength="255" />
+                <div id="nameError" class="text-danger small d-none"></div>
+            </div>
+
+            <div class="mb-3">
+                <label for="projectDescription" class="form-label fw-semibold">Description</label>
+                <div id="projectDescriptionEditor" class="border rounded"></div>
+                <input type="hidden" id="projectDescription" name="DescriptionPlainText" />
+            </div>
+
+            <div class="mt-4">
+                <button type="submit" class="btn btn-primary" id="submitButton">
+                    <span id="submitSpinner" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                    Update Project
+                </button>
+                <a asp-controller="ProjectView" asp-action="Index" asp-route-workspaceId="@workspaceId" class="btn btn-secondary ms-2">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script src="https://cdn.jsdelivr.net/npm/@("@")editorjs/editorjs@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@("@")editorjs/header@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@("@")editorjs/list@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@("@")editorjs/paragraph@latest"></script>
+    <script type="module">
+        import { initializeEditor, getEditorPlainText } from '/js/editor.js';
+        
+        // Inisialisasi Editor.js
+        let editor;
+
+        // Helper untuk mendapatkan CSRF token dari form
+        function getAntiForgeryToken() {
+            const tokenInput = document.querySelector('input[name="__RequestVerificationToken"]');
+            return tokenInput ? tokenInput.value : '';
+        }
+
+        // Fungsi untuk memuat data project
+        async function loadProjectData() {
+            try {
+                const response = await fetch(`/api/workspaces/${'@workspaceId'}/projects/${'@projectId'}`, {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`Failed to fetch project data: ${response.statusText}`);
+                }
+                
+                const project = await response.json();
+                document.getElementById('projectName').value = project.name;
+                
+                // Inisialisasi editor dengan konten yang ada
+                editor = initializeEditor('projectDescriptionEditor', {
+                    blocks: [
+                        {
+                            type: "paragraph",
+                            data: {
+                                text: project.description || ""
+                            }
+                        }
+                    ]
+                });
+            } catch (error) {
+                console.error("Error loading project data:", error);
+                const errorAlert = document.getElementById('formErrorAlert');
+                errorAlert.textContent = 'Failed to load project data. Please try again.';
+                errorAlert.classList.remove('d-none');
+            }
+        }
+
+        // Handler submit form
+        const form = document.getElementById('editProjectForm');
+        const submitButton = document.getElementById('submitButton');
+        const submitSpinner = document.getElementById('submitSpinner');
+        const errorAlert = document.getElementById('formErrorAlert');
+        const successAlert = document.getElementById('formSuccessAlert');
+        const descriptionInput = document.getElementById('projectDescription');
+
+        form.addEventListener('submit', async function(event) {
+            event.preventDefault(); // Mencegah submit standar HTML
+
+            // Simpan konten editor ke input tersembunyi
+            if (editor) {
+                const plainText = await getEditorPlainText(editor);
+                descriptionInput.value = plainText;
+            }
+
+            // Reset alert
+            errorAlert.classList.add('d-none');
+            successAlert.classList.add('d-none');
+            errorAlert.textContent = '';
+
+            // Validasi sisi klien
+            const projectName = document.getElementById('projectName').value.trim();
+            if (!projectName) {
+                const nameError = document.getElementById('nameError');
+                nameError.textContent = 'Project name is required.';
+                nameError.classList.remove('d-none');
+                return;
+            } else {
+                const nameError = document.getElementById('nameError');
+                nameError.classList.add('d-none');
+            }
+
+            // Tampilkan spinner dan disable tombol
+            submitButton.disabled = true;
+            submitSpinner.classList.remove('d-none');
+
+            // Kumpulkan data form
+            const formData = new FormData(form);
+            const data = Object.fromEntries(formData.entries());
+
+            const apiUrl = `/api/workspaces/${'@workspaceId'}/projects/${'@projectId'}`;
+
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': getAntiForgeryToken() // Ambil token CSRF
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    successAlert.textContent = `Project '${result.name}' updated successfully! Redirecting...`;
+                    successAlert.classList.remove('d-none');
+                    // Redirect setelah beberapa detik
+                    setTimeout(() => {
+                        window.location.href = `/workspaces/${'@workspaceId'}/projects`;
+                    }, 2000);
+                } else {
+                    const errorData = await response.json();
+                    let errorMessage = errorData.message || `API Error: ${response.statusText}`;
+                    if (errorData.errors) {
+                        // Format error validasi dari API
+                         const errorDetails = Object.entries(errorData.errors)
+                            .map(([key, value]) => `${key}: ${value.join(', ')}`)
+                            .join('; ');
+                         errorMessage += ` Details: ${errorDetails}`;
+                    }
+                     errorAlert.textContent = errorMessage;
+                     errorAlert.classList.remove('d-none');
+                }
+            } catch (error) {
+                console.error('Error submitting form:', error);
+                errorAlert.textContent = 'An unexpected error occurred. Please check console or try again.';
+                errorAlert.classList.remove('d-none');
+            } finally {
+                // Sembunyikan spinner dan enable tombol
+                submitButton.disabled = false;
+                submitSpinner.classList.add('d-none');
+            }
+        });
+
+        // Muat data project saat halaman dimuat
+        document.addEventListener('DOMContentLoaded', function() {
+            loadProjectData();
+        });
+    </script>
+}

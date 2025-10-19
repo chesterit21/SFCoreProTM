@@ -1,8 +1,10 @@
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using SFCoreProTM.Application.Interfaces.Repositories;
-using SFCoreProTM.Domain.Entities.Issues;
 using SFCoreProTM.Domain.Entities.Projects;
 using SFCoreProTM.Persistence.Data;
 
@@ -17,23 +19,34 @@ public sealed class ProjectRepository : IProjectRepository
         _context = context;
     }
 
-    public async Task AddAsync(
-        Project project,
-        IEnumerable<State> states,
-        IEnumerable<ProjectMember> members,
-        IEnumerable<IssueUserProperty> issueUserProperties,
-        ProjectIdentifier identifier,
-        CancellationToken cancellationToken = default)
+    public void Add(Project project)
     {
-        await _context.Projects.AddAsync(project, cancellationToken);
-        await _context.ProjectIdentifiers.AddAsync(identifier, cancellationToken);
-        await _context.States.AddRangeAsync(states, cancellationToken);
-        await _context.ProjectMembers.AddRangeAsync(members, cancellationToken);
-        await _context.IssueUserProperties.AddRangeAsync(issueUserProperties, cancellationToken);
+        _context.Projects.Add(project);
     }
 
-    public Task<IReadOnlyCollection<Project>> ListByWorkspaceAsync(Guid workspaceId, CancellationToken cancellationToken = default)
+    public async Task<Project?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        return await _context.Projects
+            .AsNoTracking()
+            .FirstOrDefaultAsync(p => p.Id == id, cancellationToken);
     }
+
+    public void Update(Project project)
+    {
+        _context.Projects.Update(project);
+    }
+
+    public async Task<IReadOnlyCollection<Project?>> ListByWorkspaceAsync(Guid workspaceId, CancellationToken cancellationToken = default)
+    {
+        return (await _context.Projects
+            .AsNoTracking()
+            .Where(project => project.WorkspaceId == workspaceId)
+            .ToListAsync(cancellationToken))
+            .AsReadOnly();
+    }
+    
+    public Task<bool> NameExistsAsync(Guid workspaceId, string name, CancellationToken cancellationToken = default) =>
+        _context.Projects
+            .AsNoTracking()
+            .AnyAsync(p => p.WorkspaceId == workspaceId && p.Name == name, cancellationToken);
 }

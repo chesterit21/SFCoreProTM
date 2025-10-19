@@ -3,7 +3,6 @@
     ViewData["Title"] = "Create New Project";
     Layout = "~/Views/Shared/_LayoutApp.cshtml"; 
     var workspaceId = ViewData["WorkspaceId"] as Guid?;
-    // var users = ViewData["Users"] as List<SelectListItem>;
 }
 
 <h2>Create New Project</h2>
@@ -18,7 +17,6 @@
             <div id="formErrorAlert" class="alert alert-danger d-none" role="alert"></div>
             <div id="formSuccessAlert" class="alert alert-success d-none" role="alert"></div>
 
-
             <div class="mb-3">
                 <label asp-for="Name" class="form-label fw-semibold"></label>
                 <input asp-for="Name" class="form-control" placeholder="Project Alpha" required maxlength="255" />
@@ -26,69 +24,9 @@
             </div>
 
             <div class="mb-3">
-                <label asp-for="Identifier" class="form-label fw-semibold"></label>
-                <input asp-for="Identifier" class="form-control" placeholder="ALPHA (max 12 chars, uppercase)" required maxlength="12" style="text-transform:uppercase;" />
-                <span asp-validation-for="Identifier" class="text-danger small"></span>
-                <div class="form-text">Short, unique identifier (e.g., TEAMX, PROJ1).</div>
-            </div>
-
-            <div class="mb-3">
                 <label asp-for="DescriptionPlainText" class="form-label fw-semibold">Description</label>
-                <textarea asp-for="DescriptionPlainText" class="form-control" rows="3" placeholder="Optional project description..."></textarea>
-            </div>
-
-            <div class="row mb-3">
-                <div class="col-md-6">
-                    <label asp-for="Visibility" class="form-label fw-semibold"></label>
-                    <select asp-for="Visibility" asp-items="Html.GetEnumSelectList<SFCoreProTM.Domain.Entities.Projects.ProjectVisibility>()" class="form-select">
-                    </select>
-                </div>
-                <div class="col-md-6">
-                    <label asp-for="Timezone" class="form-label fw-semibold"></label>
-                    <input asp-for="Timezone" class="form-control" placeholder="Default: UTC"/>
-                </div>
-            </div>
-
-            @* Ganti dengan dropdown jika user sudah ada *@
-            <div class="row mb-3">
-                <div class="col-md-6">
-                    <label asp-for="ProjectLeadId" class="form-label fw-semibold">Project Lead (Optional User ID)</label>
-                    <input asp-for="ProjectLeadId" type="text" class="form-control" placeholder="Enter User ID (GUID)"/>
-                </div>
-                <div class="col-md-6">
-                    <label asp-for="DefaultAssigneeId" class="form-label fw-semibold">Default Assignee (Optional User ID)</label>
-                    <input asp-for="DefaultAssigneeId" type="text" class="form-control" placeholder="Enter User ID (GUID)" />
-                </div>
-            </div>
-
-
-            <h5 class="mt-4">Feature Toggles</h5>
-            <div class="row row-cols-2 row-cols-sm-3 row-cols-lg-4 g-3 mb-3">
-                <div class="col">
-                    <div class="form-check form-switch">
-                        <input class="form-check-input" type="checkbox" asp-for="ModuleViewEnabled" checked>
-                        <label class="form-check-label" asp-for="ModuleViewEnabled">Modules</label>
-                    </div>
-                </div>
-                <div class="col">
-                    <div class="form-check form-switch">
-                        <input class="form-check-input" type="checkbox" asp-for="CycleViewEnabled" checked>
-                        <label class="form-check-label" asp-for="CycleViewEnabled">Cycles (Sprints)</label>
-                    </div>
-                </div>
-                <div class="col">
-                    <div class="form-check form-switch">
-                        <input class="form-check-input" type="checkbox" asp-for="IssueViewsEnabled" checked>
-                        <label class="form-check-label" asp-for="IssueViewsEnabled">Issue Views</label>
-                    </div>
-                </div>
-                <div class="col">
-                    <div class="form-check form-switch">
-                        <input class="form-check-input" type="checkbox" asp-for="PageViewEnabled" checked>
-                        <label class="form-check-label" asp-for="PageViewEnabled">Pages (Docs)</label>
-                    </div>
-                </div>
-                @* Tambahkan toggle lain jika perlu *@
+                <div id="projectDescriptionEditor" class="border rounded"></div>
+                <input asp-for="DescriptionPlainText" type="hidden" />
             </div>
 
             <div class="mt-4">
@@ -104,7 +42,21 @@
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
-    <script>
+    <script src="https://cdn.jsdelivr.net/npm/@("@")editorjs/editorjs@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@("@")editorjs/header@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@("@")editorjs/list@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@("@")editorjs/paragraph@latest"></script>
+    <script type="module">
+        import { initializeEditor, getEditorPlainText } from '/js/editor.js';
+        
+        // Inisialisasi Editor.js
+        let editor;
+        
+        // Tunggu sampai DOM selesai dimuat
+        document.addEventListener('DOMContentLoaded', function() {
+            editor = initializeEditor('projectDescriptionEditor');
+        });
+
         // Helper untuk mendapatkan CSRF token dari form
         function getAntiForgeryToken() {
             const tokenInput = document.querySelector('input[name="__RequestVerificationToken"]');
@@ -114,25 +66,22 @@
         // Fungsi untuk mendapatkan Actor ID (Current User ID) dari API
         async function getCurrentUserId() {
             try {
-                const response = await fetch('/api/users/me', { // Panggil endpoint /api/users/me
+                const response = await fetch('/api/users/me', {
                     method: 'GET',
                     headers: {
                         'Accept': 'application/json'
-                        // Header Authorization (Bearer token) seharusnya sudah otomatis terkirim
-                        // jika Anda menggunakan cookie authentication yang diset saat login.
                     }
                 });
                 if (!response.ok) {
                     throw new Error(`Failed to fetch user info: ${response.statusText}`);
                 }
                 const userData = await response.json();
-                return userData.userId; // Sesuaikan dengan nama field ID di CurrentUserDto
+                return userData.userId;
             } catch (error) {
                 console.error("Error getting current user ID:", error);
-                return null; // Atau handle error sesuai kebutuhan
+                return null;
             }
         }
-
 
         // Handler submit form
         const form = document.getElementById('createProjectForm');
@@ -140,9 +89,16 @@
         const submitSpinner = document.getElementById('submitSpinner');
         const errorAlert = document.getElementById('formErrorAlert');
         const successAlert = document.getElementById('formSuccessAlert');
+        const descriptionInput = document.querySelector('input[name="DescriptionPlainText"]');
 
         form.addEventListener('submit', async function(event) {
             event.preventDefault(); // Mencegah submit standar HTML
+
+            // Simpan konten editor ke input tersembunyi
+            if (editor) {
+                const plainText = await getEditorPlainText(editor);
+                descriptionInput.value = plainText;
+            }
 
             // Reset alert
             errorAlert.classList.add('d-none');
@@ -174,19 +130,8 @@
             const formData = new FormData(form);
             const data = Object.fromEntries(formData.entries());
 
-            // Konversi nilai checkbox ke boolean (FormData mengirim 'on'/'off' atau tidak sama sekali)
-            data.ModuleViewEnabled = document.getElementById('ModuleViewEnabled').checked;
-            data.CycleViewEnabled = document.getElementById('CycleViewEnabled').checked;
-            data.IssueViewsEnabled = document.getElementById('IssueViewsEnabled').checked;
-            data.PageViewEnabled = document.getElementById('PageViewEnabled').checked;
-            // Tambahkan konversi checkbox lain jika ada...
-
             // Tambahkan ActorId
             data.ActorId = actorId;
-
-            // Kosongkan string GUID jika tidak diisi agar validasi backend tidak gagal
-            if (data.ProjectLeadId === '') data.ProjectLeadId = null;
-            if (data.DefaultAssigneeId === '') data.DefaultAssigneeId = null;
 
             // Ambil workspaceId dari atribut data
             const workspaceId = form.dataset.workspaceId;
@@ -208,7 +153,7 @@
                     successAlert.classList.remove('d-none');
                     // Redirect setelah beberapa detik
                     setTimeout(() => {
-                        window.location.href = '/Dashboard'; // Atau ke halaman detail project: `/projects/${result.id}`
+                        window.location.href = '/Dashboard';
                     }, 2000);
                 } else {
                     const errorData = await response.json();
@@ -233,14 +178,5 @@
                 submitSpinner.classList.add('d-none');
             }
         });
-
-         // JS untuk Identifier Uppercase
-        const identifierInput = document.getElementById('Identifier');
-        if (identifierInput) {
-            identifierInput.addEventListener('input', function() {
-                this.value = this.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
-            });
-        }
-
     </script>
 }
