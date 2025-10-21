@@ -32,6 +32,7 @@ public class ErdDefinitionsController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> CreateErdDefinition(Guid moduleId, [FromBody] CreateErdDefinitionRequestDto request)
     {
+        request.ModuleId = moduleId;
         var command = new CreateErdDefinitionCommand { Request = request };
         var result = await _mediator.Send(command);
         return CreatedAtAction(nameof(GetErdDefinitionsByModuleId), new { moduleId = result.ModuleId }, result);
@@ -40,6 +41,7 @@ public class ErdDefinitionsController : ControllerBase
     [HttpPut("{id:guid}")]
     public async Task<IActionResult> UpdateErdDefinition(Guid moduleId, Guid id, [FromBody] UpdateErdDefinitionRequestDto request)
     {
+        request.ModuleId = moduleId;
         var command = new UpdateErdDefinitionCommand { ErdDefinitionId = id, Request = request };
         var result = await _mediator.Send(command);
         return Ok(result);

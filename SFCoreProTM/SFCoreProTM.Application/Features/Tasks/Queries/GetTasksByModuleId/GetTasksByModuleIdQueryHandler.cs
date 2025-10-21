@@ -21,7 +21,7 @@ public class GetTasksByModuleIdQueryHandler : IRequestHandler<GetTasksByModuleId
     public async Task<IEnumerable<TaskDto>> Handle(GetTasksByModuleIdQuery request, CancellationToken cancellationToken)
     {
         var tasks = await _taskRepository.GetByModuleIdAsync(request.ModuleId, cancellationToken);
-        
+
         return tasks.Select(task => new TaskDto
         {
             Id = task.Id,
@@ -31,7 +31,8 @@ public class GetTasksByModuleIdQueryHandler : IRequestHandler<GetTasksByModuleId
             Name = task.Name,
             Description = task.Description,
             SortOrder = task.SortOrder,
-            Status = (int)task.Status
-        }).ToList();
+            Status = (int)task.Status,
+            IsErd = task.IsErd
+        }).OrderBy(task => task.SortOrder).ToList();
     }
 }

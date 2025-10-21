@@ -4,22 +4,25 @@
 }
 
 <form id="editFlowTaskForm">
-    <input type="hidden" id="taskId" name="taskId" value="@taskId" />
-    <input type="hidden" id="flowTaskId" name="flowTaskId" value="@flowTaskId" />
+    <input type="hidden" id="editFlowTaskWorkspaceId" name="workspaceId" value="" />
+    <input type="hidden" id="editFlowTaskProjectId" name="projectId" value="" />
+    <input type="hidden" id="editFlowTaskModuleId" name="moduleId" value="" />
+    <input type="hidden" id="editFlowTaskTaskId" name="taskId" value="@taskId" />
+    <input type="hidden" id="editFlowTaskId" name="flowTaskId" value="@flowTaskId" />
     
     <div class="mb-3">
-        <label for="name" class="form-label">Name</label>
-        <input type="text" class="form-control" id="name" name="name" required>
+        <label for="editFlowTaskName" class="form-label">Name</label>
+        <input type="text" class="form-control" id="editFlowTaskName" name="name" required>
     </div>
     
     <div class="mb-3">
-        <label for="description" class="form-label">Description</label>
-        <textarea class="form-control" id="description" name="description" rows="3"></textarea>
+        <label for="editFlowTaskDescription" class="form-label">Description</label>
+        <textarea class="form-control" id="editFlowTaskDescription" name="description" rows="3"></textarea>
     </div>
     
     <div class="mb-3">
-        <label for="sortOrder" class="form-label">Sort Order</label>
-        <input type="number" class="form-control" id="sortOrder" name="sortOrder" value="1" min="1">
+        <label for="editFlowTaskSortOrder" class="form-label">Sort Order</label>
+        <input type="number" class="form-control" id="editFlowTaskSortOrder" name="sortOrder" value="1" min="1">
     </div>
     
     <div class="modal-footer">
@@ -27,59 +30,3 @@
         <button type="submit" class="btn btn-primary" id="editFlowTaskSubmitBtn">Update</button>
     </div>
 </form>
-
-<script>
-    // Load flow task data when modal is shown
-    document.addEventListener('DOMContentLoaded', function() {
-        const flowId = document.getElementById('flowTaskId').value;
-        
-        fetch(`/api/tasks/${'@taskId'}/flow-tasks`)
-            .then(response => response.json())
-            .then(data => {
-                const flow = data.find(f => f.id === flowId);
-                if (flow) {
-                    document.getElementById('name').value = flow.name;
-                    document.getElementById('description').value = flow.description;
-                    document.getElementById('sortOrder').value = flow.sortOrder;
-                }
-            })
-            .catch(error => console.error('Error loading flow task data:', error));
-    });
-    
-    document.getElementById('editFlowTaskForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-        
-        const formData = {
-            taskId: document.getElementById('taskId').value,
-            name: document.getElementById('name').value,
-            description: document.getElementById('description').value,
-            sortOrder: parseInt(document.getElementById('sortOrder').value)
-        };
-        
-        const flowId = document.getElementById('flowTaskId').value;
-        
-        fetch(`/api/tasks/${formData.taskId}/flow-tasks/${flowId}`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(formData)
-        })
-        .then(response => {
-            if (response.ok) {
-                return response.json();
-            } else {
-                throw new Error('Failed to update flow task');
-            }
-        })
-        .then(result => {
-            var editModal = bootstrap.Modal.getInstance(document.getElementById('editFlowTaskModal'));
-            editModal.hide();
-            loadFlowTasks(); // Reload flow tasks list
-            alert('Flow task updated successfully');
-        })
-        .catch(error => {
-            alert('Error updating flow task: ' + error.message);
-        });
-    });
-</script>

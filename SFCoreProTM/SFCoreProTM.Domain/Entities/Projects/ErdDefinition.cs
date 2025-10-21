@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using SFCoreProTM.Domain.Entities;
 
 namespace SFCoreProTM.Domain.Entities.Projects;
@@ -11,6 +13,8 @@ public enum ErdStatus
 
 public sealed class ErdDefinition : Entity
 {
+    private readonly List<AttributeEntitas> _attributes = new();
+
     private ErdDefinition()
     {
     }
@@ -21,11 +25,6 @@ public sealed class ErdDefinition : Entity
         string tName,
         string description,
         string entityName,
-        string attributeName,
-        string attributeType,
-        bool isPrimaryKey,
-        bool isAcceptNull,
-        string maxChar,
         int sortOrder,
         ErdStatus erdStatus)
     {
@@ -34,11 +33,6 @@ public sealed class ErdDefinition : Entity
         TName = tName;
         Description = description;
         EntityName = entityName;
-        AttributeName = attributeName;
-        AttributeType = attributeType;
-        IsPrimaryKey = isPrimaryKey;
-        IsAcceptNull = isAcceptNull;
-        MaxChar = maxChar;
         SortOrder = sortOrder;
         ErdStatus = erdStatus;
     }
@@ -47,13 +41,9 @@ public sealed class ErdDefinition : Entity
     public string TName { get; private set; } = string.Empty;
     public string Description { get; private set; } = string.Empty;
     public string EntityName { get; private set; } = string.Empty;
-    public string AttributeName { get; private set; } = string.Empty;
-    public string AttributeType { get; private set; } = string.Empty;
-    public bool IsPrimaryKey { get; private set; }
-    public bool IsAcceptNull { get; private set; }
-    public string MaxChar { get; private set; } = string.Empty;
     public int SortOrder { get; private set; }
     public ErdStatus ErdStatus { get; private set; }
+    public IReadOnlyCollection<AttributeEntitas> Attributes => _attributes.AsReadOnly();
 
     public static ErdDefinition Create(
         Guid id,
@@ -61,30 +51,17 @@ public sealed class ErdDefinition : Entity
         string tName,
         string description,
         string entityName,
-        string attributeName,
-        string attributeType,
-        bool isPrimaryKey,
-        bool isAcceptNull,
-        string maxChar,
         int sortOrder,
         ErdStatus erdStatus)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(tName);
-        ArgumentException.ThrowIfNullOrWhiteSpace(entityName);
-        ArgumentException.ThrowIfNullOrWhiteSpace(attributeName);
-        ArgumentException.ThrowIfNullOrWhiteSpace(attributeType);
 
         return new ErdDefinition(
             id,
             moduleId,
             tName,
             description ?? string.Empty,
-            entityName,
-            attributeName,
-            attributeType,
-            isPrimaryKey,
-            isAcceptNull,
-            maxChar ?? string.Empty,
+            entityName ?? string.Empty,
             sortOrder,
             erdStatus);
     }
@@ -93,11 +70,6 @@ public sealed class ErdDefinition : Entity
         string tName,
         string description,
         string entityName,
-        string attributeName,
-        string attributeType,
-        bool isPrimaryKey,
-        bool isAcceptNull,
-        string maxChar,
         int sortOrder,
         ErdStatus erdStatus)
     {
@@ -113,20 +85,43 @@ public sealed class ErdDefinition : Entity
             EntityName = entityName;
         }
 
-        if (!string.IsNullOrWhiteSpace(attributeName))
-        {
-            AttributeName = attributeName;
-        }
-
-        if (!string.IsNullOrWhiteSpace(attributeType))
-        {
-            AttributeType = attributeType;
-        }
-
-        IsPrimaryKey = isPrimaryKey;
-        IsAcceptNull = isAcceptNull;
-        MaxChar = maxChar ?? string.Empty;
         SortOrder = sortOrder;
         ErdStatus = erdStatus;
+    }
+
+    public void SetAttributes(IEnumerable<AttributeEntitas> attributes)
+    {
+        var incoming = attributes?.ToDictionary(attribute => attribute.Id) ?? new Dictionary<Guid, AttributeEntitas>();
+
+        for (var index = _attributes.Count - 1; index >= 0; index--)
+        {
+            var existingAttribute = _attributes[index];
+            if (!incoming.TryGetValue(existingAttribute.Id, out var updatedAttribute))
+            {
+                _attributes.RemoveAt(index);
+                continue;
+            }
+
+        existingAttribute.UpdateDetails(
+            updatedAttribute.Name,
+            updatedAttribute.DataType,
+            updatedAttribute.Description,
+            updatedAttribute.MaxChar,
+            updatedAttribute.SortOrder,
+            updatedAttribute.IsPrimary,
+            updatedAttribute.IsNull,
+            updatedAttribute.IsForeignKey,
+            updatedAttribute.ForeignKeyTable);
+
+        existingAttribute.AssignToErdDefinition(Id);
+
+        incoming.Remove(existingAttribute.Id);
+    }
+
+        foreach (var remainingAttribute in incoming.Values)
+        {
+            remainingAttribute.AssignToErdDefinition(Id);
+            _attributes.Add(remainingAttribute);
+        }
     }
 }

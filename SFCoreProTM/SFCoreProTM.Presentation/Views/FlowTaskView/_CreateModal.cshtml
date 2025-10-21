@@ -3,21 +3,24 @@
 }
 
 <form id="createFlowTaskForm">
-    <input type="hidden" id="taskId" name="taskId" value="@taskId" />
+    <input type="hidden" id="flowTaskWorkspaceId" name="workspaceId" value="" />
+    <input type="hidden" id="flowTaskProjectId" name="projectId" value="" />
+    <input type="hidden" id="flowTaskModuleId" name="moduleId" value="" />
+    <input type="hidden" id="flowTaskTaskId" name="taskId" value="@taskId" />
     
     <div class="mb-3">
-        <label for="name" class="form-label">Name</label>
-        <input type="text" class="form-control" id="name" name="name" required>
+        <label for="flowTaskName" class="form-label">Name</label>
+        <input type="text" class="form-control" id="flowTaskName" name="name" required>
     </div>
     
     <div class="mb-3">
-        <label for="description" class="form-label">Description</label>
-        <textarea class="form-control" id="description" name="description" rows="3"></textarea>
+        <label for="flowTaskDescription" class="form-label">Description</label>
+        <textarea class="form-control" id="flowTaskDescription" name="description" rows="3"></textarea>
     </div>
     
     <div class="mb-3">
-        <label for="sortOrder" class="form-label">Sort Order</label>
-        <input type="number" class="form-control" id="sortOrder" name="sortOrder" value="1" min="1">
+        <label for="flowTaskSortOrder" class="form-label">Sort Order</label>
+        <input type="number" class="form-control" id="flowTaskSortOrder" name="sortOrder" value="1" min="1">
     </div>
     
     <div class="modal-footer">
@@ -25,40 +28,3 @@
         <button type="submit" class="btn btn-primary" id="createFlowTaskSubmitBtn">Create</button>
     </div>
 </form>
-
-<script>
-    document.getElementById('createFlowTaskForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-        
-        const formData = {
-            taskId: document.getElementById('taskId').value,
-            name: document.getElementById('name').value,
-            description: document.getElementById('description').value,
-            sortOrder: parseInt(document.getElementById('sortOrder').value)
-        };
-        
-        fetch(`/api/tasks/${formData.taskId}/flow-tasks`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(formData)
-        })
-        .then(response => {
-            if (response.ok) {
-                return response.json();
-            } else {
-                throw new Error('Failed to create flow task');
-            }
-        })
-        .then(result => {
-            var createModal = bootstrap.Modal.getInstance(document.getElementById('createFlowTaskModal'));
-            createModal.hide();
-            loadFlowTasks(); // Reload flow tasks list
-            alert('Flow task created successfully');
-        })
-        .catch(error => {
-            alert('Error creating flow task: ' + error.message);
-        });
-    });
-</script>

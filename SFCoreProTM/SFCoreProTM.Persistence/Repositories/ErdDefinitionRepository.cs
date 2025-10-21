@@ -21,12 +21,14 @@ public class ErdDefinitionRepository : IErdDefinitionRepository
     public async Task<ErdDefinition?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
         return await _context.ErdDefinitions
+            .Include(e => e.Attributes)
             .FirstOrDefaultAsync(e => e.Id == id, cancellationToken);
     }
 
     public async Task<IEnumerable<ErdDefinition>> GetByModuleIdAsync(Guid moduleId, CancellationToken cancellationToken = default)
     {
         return await _context.ErdDefinitions
+            .Include(e => e.Attributes)
             .Where(e => e.ModuleId == moduleId)
             .OrderBy(e => e.SortOrder)
             .ToListAsync(cancellationToken);

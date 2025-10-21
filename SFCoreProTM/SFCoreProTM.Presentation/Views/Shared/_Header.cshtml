@@ -23,7 +23,6 @@
 
 <nav class="navbar navbar-expand-lg navbar-dark" style="background: linear-gradient(135deg, rgba(15, 76, 129, 0.95) 0%, rgba(37, 99, 235, 0.85) 100%); box-shadow: 0 12px 24px -18px rgba(15, 23, 42, 0.4);">
     <div class="container-fluid px-4">
-        @* Brand/Logo Section *@
         <a class="navbar-brand d-flex align-items-center me-4" href="/">
             <div class="d-inline-flex align-items-center justify-content-center me-3" style="width: 52px; height: 52px; border-radius: 16px; background: rgba(15, 23, 42, 0.35); font-weight: 700; font-size: 1.25rem;">
                 SF
@@ -33,6 +32,14 @@
                 <small style="color: rgba(248, 250, 252, 0.78);">@todaysDate</small>
             </div>
         </a>
+        @* Brand/Logo Section *@
+        <button class="btn btn-outline-light btn-sm me-3 sidebar-toggle-btn d-flex align-items-center justify-content-center"
+                type="button"
+                id="sidebarToggleBtn"
+                aria-label="Toggle sidebar"
+                aria-expanded="true">
+            <i class="fas fa-bars"></i>
+        </button>
 
         @* Application Menu (Center) *@
         <div class="collapse navbar-collapse justify-content-center" id="navbarNav">

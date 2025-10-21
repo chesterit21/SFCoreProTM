@@ -3,91 +3,75 @@
     var taskId = ViewBag.TaskId as Guid?;
 }
 
-<form id="editTaskForm">
-    <input type="hidden" id="moduleId" name="moduleId" value="@moduleId" />
-    <input type="hidden" id="taskId" name="taskId" value="@taskId" />
-    <input type="hidden" id="projectId" name="projectId" value="" />
-    <input type="hidden" id="workspaceId" name="workspaceId" value="" />
-    
-    <div class="mb-3">
-        <label for="name" class="form-label">Name</label>
-        <input type="text" class="form-control" id="name" name="name" required>
+<div class="modal fade" id="editTaskModal" tabindex="-1" aria-labelledby="editTaskModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editTaskModalLabel">Edit Task</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editTaskForm">
+                    <input type="hidden" id="editModuleId" name="moduleId" value="@moduleId" />
+                    <input type="hidden" id="editTaskId" name="taskId" value="@taskId" />
+                    <input type="hidden" id="editProjectId" name="projectId" value="" />
+                    <input type="hidden" id="editWorkspaceId" name="workspaceId" value="" />
+
+                    <div class="mb-3">
+                        <label for="editName" class="form-label">Name</label>
+                        <input type="text" class="form-control" id="editName" name="name" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="editDescription" class="form-label">Description</label>
+                        <textarea class="form-control" id="editDescription" name="description" rows="5"></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="editSortOrder" class="form-label">Sort Order</label>
+                        <input type="number" class="form-control" id="editSortOrder" name="sortOrder" value="1" min="1">
+                    </div>
+
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="editIsErd" name="isErd">
+                        <label class="form-check-label" for="editIsErd">Is ERD</label>
+                    </div>
+
+                    <div class="mb-3" id="editErdDefinitionButton" style="display: none;">
+                        <button type="button" class="btn btn-outline-secondary btn-sm" id="editAddErdDefinitionBtn">
+                            <i class="fas fa-plus"></i> + ERD Definition
+                        </button>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary" id="editTaskSubmitBtn">Update</button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
-    
-    <div class="mb-3">
-        <label for="description" class="form-label">Description</label>
-        <textarea class="form-control" id="description" name="description" rows="5"></textarea>
-    </div>
-    
-    <div class="mb-3">
-        <label for="sortOrder" class="form-label">Sort Order</label>
-        <input type="number" class="form-control" id="sortOrder" name="sortOrder" value="1" min="1">
-    </div>
-    
-    <div class="mb-3 form-check">
-        <input type="checkbox" class="form-check-input" id="isErd" name="isErd">
-        <label class="form-check-label" for="isErd">Is ERD</label>
-    </div>
-    
-    <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-        <button type="submit" class="btn btn-primary" id="editTaskSubmitBtn">Update</button>
-    </div>
-</form>
+</div>
 
 <script>
-    // Load task data when modal is shown
-    document.addEventListener('DOMContentLoaded', function() {
-        const taskId = document.getElementById('taskId').value;
-        
-        fetch(`/api/modules/${'@moduleId'}/tasks`)
-            .then(response => response.json())
-            .then(data => {
-                const task = data.find(t => t.id === taskId);
-                if (task) {
-                    document.getElementById('name').value = task.name;
-                    document.getElementById('sortOrder').value = task.sortOrder;
-                    document.getElementById('isErd').checked = task.isErd;
-                    document.getElementById('projectId').value = task.projectId;
-                    document.getElementById('workspaceId').value = task.workspaceId;
-                    document.getElementById('description').value = task.description || "";
-                }
-            });
+    // Get workspace ID and project ID from some global variable or API call
+    // For now, we'll leave it empty and you can implement as needed
+    document.getElementById('editWorkspaceId').value = ''; // You need to set this appropriately
+    document.getElementById('editProjectId').value = ''; // You need to set this appropriately
+
+    // Toggle ERD Definition button visibility based on Is ERD checkbox
+    document.getElementById('editIsErd').addEventListener('change', function () {
+        const erdDefinitionButton = document.getElementById('editErdDefinitionButton');
+        if (this.checked) {
+            erdDefinitionButton.style.display = 'block';
+        } else {
+            erdDefinitionButton.style.display = 'none';
+        }
     });
-    
-    document.getElementById('editTaskForm').addEventListener('submit', async function(e) {
-        e.preventDefault();
-        
-        const formData = {
-            moduleId: document.getElementById('moduleId').value,
-            taskId: document.getElementById('taskId').value,
-            projectId: document.getElementById('projectId').value,
-            workspaceId: document.getElementById('workspaceId').value,
-            name: document.getElementById('name').value,
-            description: document.getElementById('description').value,
-            sortOrder: parseInt(document.getElementById('sortOrder').value),
-            isErd: document.getElementById('isErd').checked
-        };
-        
-        fetch(`/api/modules/${formData.moduleId}/tasks/${formData.taskId}`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(formData)
-        })
-        .then(response => response.json())
-        .then(data => {
-            // Close modal
-            const modal = bootstrap.Modal.getInstance(document.getElementById('editTaskModal'));
-            modal.hide();
-            
-            // Reload tasks
-            loadTasks();
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('Error updating task: ' + error.message);
-        });
+
+    // Handle Add ERD Definition button click
+    document.getElementById('editAddErdDefinitionBtn').addEventListener('click', function () {
+        alert('Add ERD Definition functionality will be implemented here');
+        // Implement the logic to add ERD definition
     });
 </script>

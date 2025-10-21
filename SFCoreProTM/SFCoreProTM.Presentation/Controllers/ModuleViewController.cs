@@ -23,6 +23,7 @@ public class ModuleViewController : Controller
     public async Task<IActionResult> Index(Guid projectId)
     {
         ViewBag.ProjectId = projectId;
+        ViewBag.WorkspaceId = _currentUserService.WorkspaceId;
         
         try 
         {

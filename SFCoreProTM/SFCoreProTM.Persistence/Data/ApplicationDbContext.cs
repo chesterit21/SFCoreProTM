@@ -19,6 +19,7 @@ public class ApplicationDbContext : DbContext
     public DbSet<Module> Modules => Set<Module>();
     public DbSet<TaskEntity> Tasks => Set<TaskEntity>();
     public DbSet<ErdDefinition> ErdDefinitions => Set<ErdDefinition>();
+    public DbSet<AttributeEntitas> AttributeEntitas => Set<AttributeEntitas>();
     public DbSet<SprintPlanning> SprintPlannings => Set<SprintPlanning>();
     public DbSet<FlowTask> FlowTasks => Set<FlowTask>();
     public DbSet<Workspace> Workspaces => Set<Workspace>();

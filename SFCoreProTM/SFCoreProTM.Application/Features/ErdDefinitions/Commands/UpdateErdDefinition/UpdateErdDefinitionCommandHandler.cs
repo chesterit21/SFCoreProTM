@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
@@ -33,14 +34,26 @@ public class UpdateErdDefinitionCommandHandler : IRequestHandler<UpdateErdDefini
             request.Request.TName,
             request.Request.Description,
             request.Request.EntityName,
-            request.Request.AttributeName,
-            request.Request.AttributeType,
-            request.Request.IsPrimaryKey,
-            request.Request.IsAcceptNull,
-            request.Request.MaxChar,
             request.Request.SortOrder,
             erdDefinition.ErdStatus
         );
+
+        var attributes = (request.Request.Attributes ?? Array.Empty<AttributeEntitasRequestDto>())
+            .Select(attribute => AttributeEntitas.Create(
+                attribute.Id ?? Guid.NewGuid(),
+                erdDefinition.Id,
+                attribute.Name,
+                attribute.DataType,
+                attribute.Description,
+                attribute.MaxChar,
+                attribute.SortOrder,
+                attribute.IsPrimary,
+                attribute.IsNull,
+                attribute.IsForeignKey,
+                attribute.ForeignKeyTable
+            ));
+
+        erdDefinition.SetAttributes(attributes);
 
         await _erdDefinitionRepository.UpdateAsync(erdDefinition, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
@@ -52,13 +65,23 @@ public class UpdateErdDefinitionCommandHandler : IRequestHandler<UpdateErdDefini
             TName = erdDefinition.TName,
             Description = erdDefinition.Description,
             EntityName = erdDefinition.EntityName,
-            AttributeName = erdDefinition.AttributeName,
-            AttributeType = erdDefinition.AttributeType,
-            IsPrimaryKey = erdDefinition.IsPrimaryKey,
-            IsAcceptNull = erdDefinition.IsAcceptNull,
-            MaxChar = erdDefinition.MaxChar,
             SortOrder = erdDefinition.SortOrder,
-            ErdStatus = (int)erdDefinition.ErdStatus
+            ErdStatus = (int)erdDefinition.ErdStatus,
+            Attributes = erdDefinition.Attributes
+                .OrderBy(a => a.SortOrder ?? int.MaxValue)
+                .Select(attribute => new AttributeEntitasDto
+                {
+                    Id = attribute.Id,
+                    Name = attribute.Name,
+                    DataType = attribute.DataType,
+                    Description = attribute.Description,
+                    MaxChar = attribute.MaxChar,
+                    SortOrder = attribute.SortOrder,
+                    IsPrimary = attribute.IsPrimary,
+                    IsNull = attribute.IsNull,
+                    IsForeignKey = attribute.IsForeignKey,
+                    ForeignKeyTable = attribute.ForeignKeyTable
+                })
         };
     }
 }

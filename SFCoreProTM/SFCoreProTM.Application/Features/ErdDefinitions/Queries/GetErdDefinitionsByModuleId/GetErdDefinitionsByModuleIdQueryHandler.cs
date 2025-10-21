@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using MediatR;
 using SFCoreProTM.Application.DTOs.ErdDefinitions;
 using SFCoreProTM.Application.Interfaces.Repositories;
-using SFCoreProTM.Domain.Entities.Projects;
 
 namespace SFCoreProTM.Application.Features.ErdDefinitions.Queries.GetErdDefinitionsByModuleId;
 
@@ -29,13 +28,23 @@ public class GetErdDefinitionsByModuleIdQueryHandler : IRequestHandler<GetErdDef
             TName = erdDefinition.TName,
             Description = erdDefinition.Description,
             EntityName = erdDefinition.EntityName,
-            AttributeName = erdDefinition.AttributeName,
-            AttributeType = erdDefinition.AttributeType,
-            IsPrimaryKey = erdDefinition.IsPrimaryKey,
-            IsAcceptNull = erdDefinition.IsAcceptNull,
-            MaxChar = erdDefinition.MaxChar,
             SortOrder = erdDefinition.SortOrder,
-            ErdStatus = (int)erdDefinition.ErdStatus
+            ErdStatus = (int)erdDefinition.ErdStatus,
+            Attributes = erdDefinition.Attributes
+                .OrderBy(attribute => attribute.SortOrder ?? int.MaxValue)
+                .Select(attribute => new AttributeEntitasDto
+                {
+                    Id = attribute.Id,
+                    Name = attribute.Name,
+                    DataType = attribute.DataType,
+                    Description = attribute.Description,
+                    MaxChar = attribute.MaxChar,
+                    SortOrder = attribute.SortOrder,
+                    IsPrimary = attribute.IsPrimary,
+                    IsNull = attribute.IsNull,
+                    IsForeignKey = attribute.IsForeignKey,
+                    ForeignKeyTable = attribute.ForeignKeyTable
+                })
         }).ToList();
     }
 }
