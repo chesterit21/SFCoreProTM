@@ -8,6 +8,8 @@ using System;
 using SFCoreProTM.Presentation.Services;
 using Microsoft.Extensions.Logging;
 using System.Text.Json.Serialization;
+using Microsoft.AspNetCore.ResponseCompression;
+using Microsoft.AspNetCore.StaticFiles;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,6 +17,17 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
 builder.Logging.AddDebug();
+
+// 1. Menambahkan service untuk Response Compression (Gzip & Brotli)
+builder.Services.AddResponseCompression(options =>
+{
+    options.EnableForHttps = true;
+    options.Providers.Add<BrotliCompressionProvider>();
+    options.Providers.Add<GzipCompressionProvider>();
+});
+
+// 2. Menambahkan service untuk Response Caching
+builder.Services.AddResponseCaching();
 
 builder.Services.AddControllersWithViews()
     .AddRazorRuntimeCompilation()
@@ -45,6 +58,9 @@ builder.Services.AddSession(options =>
 
 var app = builder.Build();
 
+// 3. Menggunakan Response Compression di awal pipeline
+app.UseResponseCompression();
+
 app.UseGlobalExceptionHandler();
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
@@ -55,6 +71,20 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+// 5. Menambahkan Caching untuk File Statis (JS, CSS, Gambar, dll.)
+//var cachePeriod = "20"; //"604800"; // 7 hari dalam detik
+// app.UseStaticFiles(new StaticFileOptions
+// {
+//     OnPrepareResponse = ctx =>
+//     {
+//         ctx.Context.Response.Headers.Append("Cache-Control", $"public, max-age={cachePeriod}");
+//     }
+// });
+
+// 4. Menggunakan Response Caching
+app.UseResponseCaching();
+
 app.UseRouting();
 
 app.UseAuthentication();

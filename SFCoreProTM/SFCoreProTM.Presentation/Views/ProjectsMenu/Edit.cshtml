@@ -28,6 +28,22 @@
                 <textarea class="form-control" id="projectDescription" name="DescriptionPlainText" rows="25"></textarea>
             </div>
 
+            <div class="mb-3">
+                <label for="projectPath" class="form-label fw-semibold">Project Path</label>
+                <input type="text" class="form-control" id="projectPath" name="ProjectPath" />
+            </div>
+
+            <div class="mb-3">
+                <label for="projectStatus" class="form-label fw-semibold">Status</label>
+                <select class="form-control" id="projectStatus" name="Status">
+                    <option value="0">BackLog</option>
+                    <option value="1">Running</option>
+                    <option value="2">Done</option>
+                    <option value="3">Pause</option>
+                    <option value="4">Rejected</option>
+                </select>
+            </div>
+
             <div class="mt-4">
                 <button type="submit" class="btn btn-primary" id="submitButton">
                     <span id="submitSpinner" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
@@ -64,6 +80,8 @@
                 const project = await response.json();
                 document.getElementById('projectName').value = project.name;
                 document.getElementById('projectDescription').value = project.description || "";
+                document.getElementById('projectPath').value = project.projectPath || "";
+                document.getElementById('projectStatus').value = project.status;
             } catch (error) {
                 console.error("Error loading project data:", error);
                 const errorAlert = document.getElementById('formErrorAlert');

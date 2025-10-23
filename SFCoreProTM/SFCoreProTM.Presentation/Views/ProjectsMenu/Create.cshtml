@@ -29,6 +29,12 @@
                 <textarea asp-for="DescriptionPlainText" class="form-control" rows="25" placeholder="Enter project description"></textarea>
             </div>
 
+            <div class="mb-3">
+                <label asp-for="ProjectPath" class="form-label fw-semibold">Project Path</label>
+                <input asp-for="ProjectPath" class="form-control" placeholder="/path/to/project" />
+                <span asp-validation-for="ProjectPath" class="text-danger small"></span>
+            </div>
+
             <div class="mt-4">
                 <button type="submit" class="btn btn-primary" id="submitButton">
                     <span id="submitSpinner" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>

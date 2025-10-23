@@ -2,74 +2,34 @@
     var moduleId = ViewBag.ModuleId as Guid?;
 }
 
-<div class="modal fade" id="createTaskModal" tabindex="-1" aria-labelledby="createTaskModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-xl">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="createTaskModalLabel">Create Task</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <form id="createTaskForm">
-                    <input type="hidden" id="moduleId" name="moduleId" value="@moduleId" />
-                    <input type="hidden" id="projectId" name="projectId" value="" />
-                    <input type="hidden" id="workspaceId" name="workspaceId" value="" />
-
-                    <div class="mb-3">
-                        <label for="name" class="form-label">Name</label>
-                        <input type="text" class="form-control" id="name" name="name" required>
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="description" class="form-label">Description</label>
-                        <textarea class="form-control" id="description" name="description" rows="5"></textarea>
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="sortOrder" class="form-label">Sort Order</label>
-                        <input type="number" class="form-control" id="sortOrder" name="sortOrder" value="1" min="1">
-                    </div>
-
-                    <div class="mb-3 form-check">
-                        <input type="checkbox" class="form-check-input" id="isErd" name="isErd">
-                        <label class="form-check-label" for="isErd">Is ERD</label>
-                    </div>
-
-                    <div class="mb-3" id="erdDefinitionButton" style="display: none;">
-                        <button type="button" class="btn btn-outline-secondary btn-sm" id="addErdDefinitionBtn">
-                            <i class="fas fa-plus"></i> + ERD Definition
-                        </button>
-                    </div>
-
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-primary" id="createTaskSubmitBtn">Create</button>
-                    </div>
-                </form>
+<form id="createTaskForm">
+    <input type="hidden" name="moduleId" value="@moduleId" />
+    
+    <div class="mb-3">
+        <label for="name" class="form-label">Task Name</label>
+        <input type="text" class="form-control" id="name" name="name" required>
+    </div>
+    
+    <div class="mb-3">
+        <label for="description" class="form-label">Description</label>
+        <textarea class="form-control" id="description" name="description" rows="3"></textarea>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-6 mb-3">
+            <label for="sortOrder" class="form-label">Sort Order</label>
+            <input type="number" class="form-control" id="sortOrder" name="sortOrder" value="1" min="1">
+        </div>
+        <div class="col-md-6 mb-3">
+            <div class="form-check form-switch mt-4 pt-2">
+                <input class="form-check-input" type="checkbox" id="isErd" name="isErd">
+                <label class="form-check-label" for="isErd">Is ERD Task?</label>
             </div>
         </div>
     </div>
-</div>
-
-<script>
-    // Get workspace ID and project ID from some global variable or API call
-    // For now, we'll leave it empty and you can implement as needed
-    document.getElementById('workspaceId').value = ''; // You need to set this appropriately
-    document.getElementById('projectId').value = ''; // You need to set this appropriately
-
-    // Toggle ERD Definition button visibility based on Is ERD checkbox
-    document.getElementById('isErd').addEventListener('change', function () {
-        const erdDefinitionButton = document.getElementById('erdDefinitionButton');
-        if (this.checked) {
-            erdDefinitionButton.style.display = 'block';
-        } else {
-            erdDefinitionButton.style.display = 'none';
-        }
-    });
-
-    // Handle Add ERD Definition button click
-    document.getElementById('addErdDefinitionBtn').addEventListener('click', function () {
-        alert('Add ERD Definition functionality will be implemented here');
-        // Implement the logic to add ERD definition
-    });
-</script>
+    
+    <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="submit" class="btn btn-primary">Create Task</button>
+    </div>
+</form>

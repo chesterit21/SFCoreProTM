@@ -67,7 +67,7 @@ public class ProjectsMenuController : Controller
     
     // Action untuk menampilkan form Edit Project
     [HttpGet]
-    public async Task<IActionResult> Edit(Guid id)
+    public IActionResult Edit(Guid id)
     {
         // Kirim workspaceId dan projectId ke view agar bisa digunakan oleh JavaScript
         ViewData["WorkspaceId"] = _currentUserService.WorkspaceId;

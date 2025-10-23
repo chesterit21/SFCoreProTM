@@ -1,0 +1,20 @@
+/*
+ * CSS for the global page loading progress bar.
+ */
+
+#global-loader {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 3px; /* Height of the progress bar */
+    background-color: #0d6efd; /* A vibrant color, e.g., Bootstrap primary */
+    width: 0%;
+    z-index: 99999; /* Ensure it's on top of everything */
+    transition: width 0.2s ease-out, opacity 0.3s ease-in-out;
+    opacity: 0;
+    box-shadow: 0 0 10px #0d6efd, 0 0 5px #0d6efd;
+}
+
+#global-loader.active {
+    opacity: 1;
+}

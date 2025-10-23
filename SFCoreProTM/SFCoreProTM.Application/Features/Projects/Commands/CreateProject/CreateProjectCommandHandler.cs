@@ -42,13 +42,13 @@ public class CreateProjectCommandHandler : IRequestHandler<CreateProjectCommand,
             throw new ConflictException($"Project name '{projectName}' is already in use.");
         }
 
-        // 1. Create the Aggregate Root dengan ProjectPath kosong
+        // 1. Create the Aggregate Root
         var project = Project.Create(
             Guid.NewGuid(),
             request.WorkspaceId,
             projectName,
             payload.Description,
-            string.Empty); // Gunakan string kosong untuk ProjectPath
+            payload.ProjectPath);
 
         // 2. Persist the aggregate
         await using var transaction = await _unitOfWork.BeginTransactionAsync(cancellationToken);

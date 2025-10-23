@@ -162,6 +162,36 @@
     </div>
 </div>
 
+<!-- Create Task Modal -->
+<div class="modal fade" id="createTaskModal" tabindex="-1" aria-labelledby="createTaskModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="createTaskModalLabel">Create Task</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Create task form will be loaded here -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Task Modal -->
+<div class="modal fade" id="editTaskModal" tabindex="-1" aria-labelledby="editTaskModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editTaskModalLabel">Edit Task</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Edit task form will be loaded here -->
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Edit Flow Task Modal -->
 <div class="modal fade" id="editFlowTaskModal" tabindex="-1" aria-labelledby="editFlowTaskModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-xl">
@@ -178,7 +208,5 @@
 </div>
 
 @section Scripts {
-    <script src="~/js/modules.js"></script>
-    <script src="~/js/tasks/task.js"></script>
-    <script src="~/js/tasks/flowtasks.js"></script>
+    <script src="~/assets/js/views/modules/index.js" type="module"></script>
 }

@@ -38,7 +38,8 @@ public class UpdateProjectCommandHandler : IRequestHandler<UpdateProjectCommand,
         project.UpdateDetails(
             request.Payload.Name.Trim(),
             request.Payload.Description,
-            project.ProjectPath); // Keep existing project path
+            request.Payload.ProjectPath,
+            request.Payload.Status);
 
         // Persist changes
         await using var transaction = await _unitOfWork.BeginTransactionAsync(cancellationToken);

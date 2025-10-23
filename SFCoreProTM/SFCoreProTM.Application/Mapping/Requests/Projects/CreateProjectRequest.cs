@@ -13,4 +13,7 @@ public sealed class CreateProjectRequest
     public string Name { get; set; } = string.Empty;
 
     public string? DescriptionPlainText { get; set; }
+
+    [MaxLength(500)]
+    public string? ProjectPath { get; set; }
 }

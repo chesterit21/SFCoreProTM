@@ -8,7 +8,7 @@ public class HomeController : Controller
 {
     public IActionResult Index()
     {        // Jika pengguna sudah login, redirect ke dashboard
-        if (User.Identity.IsAuthenticated)
+        if (User.Identity?.IsAuthenticated == true)
         {
             return RedirectToAction("Index", "Dashboard");
         }
@@ -23,7 +23,7 @@ public class HomeController : Controller
     public IActionResult Login()
     {
         // Jika pengguna sudah login, redirect ke dashboard
-        if (User.Identity.IsAuthenticated)
+        if (User.Identity?.IsAuthenticated == true)
         {
             return RedirectToAction("Index", "Dashboard");
         }

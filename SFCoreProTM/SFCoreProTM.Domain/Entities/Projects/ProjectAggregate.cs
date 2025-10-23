@@ -17,6 +17,7 @@ public sealed class Project : AggregateRoot
         Name = name;
         Description = description;
         ProjectPath = projectPath;
+        Status = ProjectStatus.BackLog;
     }
 
     public Guid WorkspaceId { get; private set; }
@@ -27,6 +28,8 @@ public sealed class Project : AggregateRoot
 
     public string ProjectPath { get; private set; } = string.Empty;
 
+    public ProjectStatus Status { get; private set; }
+
     public static Project Create(Guid id, Guid workspaceId, string name, string description, string projectPath)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(name);
@@ -34,7 +37,7 @@ public sealed class Project : AggregateRoot
         return new Project(id, workspaceId, name, description ?? string.Empty, projectPath ?? string.Empty);
     }
 
-    public void UpdateDetails(string name, string description, string projectPath)
+    public void UpdateDetails(string name, string description, string projectPath, ProjectStatus status)
     {
         if (!string.IsNullOrWhiteSpace(name))
         {
@@ -43,5 +46,6 @@ public sealed class Project : AggregateRoot
         
         Description = description ?? string.Empty;
         ProjectPath = projectPath ?? string.Empty;
+        Status = status;
     }
 }

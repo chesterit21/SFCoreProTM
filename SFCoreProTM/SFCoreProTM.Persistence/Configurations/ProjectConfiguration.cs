@@ -15,5 +15,9 @@ public class ProjectConfiguration : IEntityTypeConfiguration<Project>
         builder.Property(p => p.Name).HasMaxLength(255).IsRequired();
         builder.Property(p => p.Description).IsRequired();
         builder.Property(p => p.ProjectPath).HasMaxLength(500).IsRequired();
+        builder.Property(p => p.Status)
+            .IsRequired()
+            .HasConversion<string>()
+            .HasMaxLength(50);
     }
 }
