@@ -53,7 +53,7 @@ namespace SFCoreProTM.Persistence.Configurations
                 .HasColumnType("jsonb");
             goalsProperty.Metadata.SetValueComparer(ValueConverters.StructuredDataComparer);
             builder.Property(p => p.BackgroundColor)
-                .HasConversion(color => color.Value, value => ColorCode.FromHex(value))
+                .HasConversion(color => color == null ? null : color.Value, value => value == null ? null : ColorCode.FromHex(value))
                 .HasMaxLength(7);
             builder.Property(p => p.HasMarketingEmailConsent);
         }

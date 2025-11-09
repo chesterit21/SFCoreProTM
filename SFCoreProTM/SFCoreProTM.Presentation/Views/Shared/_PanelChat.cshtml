@@ -1,0 +1,26 @@
+    <div id="chatPanel" class="chat-panel">
+        <div class="chat-panel-header">
+            <h5 class="mb-0" style="font-size: 0.9rem;">SFCore AI</h5>
+            <button type="button" class="btn-close" id="closeChatPanel" style="font-size: 0.7rem;"></button>
+        </div>
+        <div class="chat-panel-body">
+            <div class="chat-messages" id="chatMessages">
+                <!-- Messages will be populated here -->
+            </div>
+            <div class="chat-input-area">
+                <textarea rows="5" id="chatInput" class="form-control" placeholder="Type your message..." style="font-size: 1.03rem;"></textarea>
+                <div class="d-flex flex-row-reverse">
+                    <select id="chatMode" class="form-control ms-2" style="font-size: 0.75rem; padding: 0.25rem; width:65px;height:30px;cursor:pointer; border: 1px solid #7b26a3;" title="Select mode">
+                        <option value="chat">Chat</option>
+                        <option value="agent">Agent</option>
+                    </select>
+                    <button class="btn btn-primary ms-2" type="button" id="sendChatMessage" style="font-size: 0.8rem;" title="Send message">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                    <button class="btn btn-dark ms-2" type="button" id="clearChatMessage" style="font-size: 0.8rem;" title="Clear messages">
+                        <i class="fa-solid fa-broom"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>

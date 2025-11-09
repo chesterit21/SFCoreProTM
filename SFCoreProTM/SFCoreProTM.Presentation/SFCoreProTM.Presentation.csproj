@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
-    <TargetFramework>net10.0</TargetFramework>
+    <TargetFramework>net9.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
@@ -24,6 +24,7 @@
     <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="11.0.0" />
     <PackageReference Include="FluentValidation.AspNetCore" Version="11.3.1" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="9.0.10" />
+    <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="9.0.10" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4" />
     <PackageReference Include="AutoMapper" Version="15.0.1" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.10" />
@@ -52,10 +53,7 @@
   </ItemGroup>
 
   <!-- Trigger the Vite build whenever the ASP.NET Core project is built or published -->
-  <Target Name="EnsureClientAppDependencies"
-          Inputs="@(ClientAppRestoreInputs)"
-          Outputs="$(NodeModulesStampFile)"
-          Condition="Exists('$(ClientAppDirectory)/package.json')">
+  <Target Name="EnsureClientAppDependencies" Inputs="@(ClientAppRestoreInputs)" Outputs="$(NodeModulesStampFile)" Condition="Exists('$(ClientAppDirectory)/package.json')">
     <Message Importance="high" Text="Restoring npm packages in $(ClientAppDirectory)..." />
     <Exec Command="npm install" WorkingDirectory="ClientApp" />
     <MakeDir Directories="$([System.IO.Path]::GetDirectoryName('$(NodeModulesStampFile)'))" />

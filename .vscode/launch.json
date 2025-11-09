@@ -1,0 +1,52 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "SFCoreProTM Presentation",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            "program": "${workspaceFolder}/SFCoreProTM/SFCoreProTM.Presentation/bin/Debug/net10.0/SFCoreProTM.Presentation.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/SFCoreProTM/SFCoreProTM.Presentation",
+            "stopAtEntry": false,
+            "serverReadyAction": {
+                "action": "openExternally",
+                "pattern": "\\bNow listening on:\\s+(https?://\\S+)"
+            },
+            "env": {
+                "ASPNETCORE_ENVIRONMENT": "Development"
+            },
+            "sourceFileMap": {
+                "/Views": "${workspaceFolder}/SFCoreProTM/SFCoreProTM.Presentation/Views"
+            }
+        },
+        // {
+        //     "name": "SFCore.AgentWorkflow.API",
+        //     "type": "coreclr",
+        //     "request": "launch",
+        //     "preLaunchTask": "build-agent-api",
+        //     "program": "${workspaceFolder}/SFCore.AgentWorkflow/SFCore.AgentWorkflow.API/bin/Debug/net9.0/SFCore.AgentWorkflow.API.dll",
+        //     "args": [],
+        //     "cwd": "${workspaceFolder}/SFCore.AgentWorkflow/SFCore.AgentWorkflow.API",
+        //     "stopAtEntry": false,
+        //     "serverReadyAction": {
+        //         "action": "openExternally",
+        //         "pattern": "\\bNow listening on:\\s+(https?://\\S+)"
+        //     },
+        //     "env": {
+        //         "ASPNETCORE_ENVIRONMENT": "Development"
+        //     }
+        // }
+    ]
+    // ,
+    // "compounds": [
+    //     {
+    //         "name": "SFCore.AgentWorkflow.API",
+    //         "configurations": ["SFCore.AgentWorkflow.API"]
+    //     }
+    // ]
+}

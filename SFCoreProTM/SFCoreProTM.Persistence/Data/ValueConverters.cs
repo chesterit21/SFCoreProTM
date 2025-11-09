@@ -47,7 +47,7 @@ public static class ValueConverters
 
     public static readonly ValueComparer<EmailAddress> NonNullEmailAddressComparer = new(
         (left, right) => left != null && right != null && string.Equals(left.Value, right.Value, StringComparison.OrdinalIgnoreCase),
-        value => value.Value.ToUpperInvariant().GetHashCode(StringComparison.Ordinal),
+        value => StringComparer.OrdinalIgnoreCase.GetHashCode(value.Value),
         value => EmailAddress.Create(value.Value));
 
     public static readonly ValueConverter<EmailAddress?, string?> EmailAddressConverter = new(
@@ -62,18 +62,18 @@ public static class ValueConverters
             (left != null && right != null && string.Equals(left.Value, right.Value, StringComparison.OrdinalIgnoreCase)),
         value => value == null
             ? 0
-            : value.Value.ToUpperInvariant().GetHashCode(StringComparison.Ordinal),
+            : StringComparer.OrdinalIgnoreCase.GetHashCode(value.Value),
         value => value == null
             ? null
             : EmailAddress.Create(value.Value));
 
-    public static readonly ValueConverter<StructuredData, string?> StructuredDataConverter = new(
+    public static readonly ValueConverter<StructuredData?, string?> StructuredDataConverter = new(
         value => value == null ? null : value.RawJson,
         json => StructuredData.FromJson(json));
 
-    public static readonly ValueComparer<StructuredData> StructuredDataComparer = new(
+    public static readonly ValueComparer<StructuredData?> StructuredDataComparer = new(
         (left, right) => string.Equals(left == null ? null : left.RawJson, right == null ? null : right.RawJson, StringComparison.Ordinal),
-        value => value == null || value.RawJson == null ? 0 : value.RawJson.GetHashCode(StringComparison.Ordinal),
+        value => value == null || value.RawJson == null ? 0 : StringComparer.Ordinal.GetHashCode(value.RawJson),
         value => value == null ? StructuredData.FromJson(null) : StructuredData.FromJson(value.RawJson));
 
     public static readonly ValueConverter<RichTextContent, string?> RichTextContentConverter = new(
@@ -97,7 +97,7 @@ public static class ValueConverters
              string.Equals(left.Json, right.Json, StringComparison.Ordinal) &&
              StructuralComparisons.StructuralEqualityComparer.Equals(left.Binary, right.Binary)),
         value => value == null ? 0 : HashCode.Combine(value.PlainText, value.Html, value.Json, value.Binary),
-        value => value == null ? RichTextContent.Create() : RichTextContent.Create(value.PlainText, value.Html, value.Binary, value.Json));
+        value => value == null ? RichTextContent.Create(null, null, null, null) : RichTextContent.Create(value.PlainText, value.Html, value.Binary, value.Json));
 
     public static readonly ValueConverter<DateRange, string?> DateRangeConverter = new(
         value => value == null
@@ -143,7 +143,7 @@ public static class ValueConverters
              left.Select(url => url.Value).SequenceEqual(right.Select(url => url.Value), StringComparer.Ordinal)),
         value => value == null
             ? 0
-            : value.Aggregate(0, (current, url) => HashCode.Combine(current, url.Value.GetHashCode(StringComparison.Ordinal))),
+            : value.Aggregate(0, (current, url) => HashCode.Combine(current, StringComparer.Ordinal.GetHashCode(url.Value))),
         value => value == null
             ? new List<Url>()
             : value.Select(url => Url.Create(url.Value)).ToList());
@@ -156,7 +156,7 @@ public static class ValueConverters
         (left, right) =>
             (left == null && right == null) ||
             (left != null && right != null && string.Equals(left.Value, right.Value, StringComparison.Ordinal)),
-        value => value == null ? 0 : value.Value.GetHashCode(StringComparison.Ordinal),
+        value => value == null ? 0 : StringComparer.Ordinal.GetHashCode(value.Value),
         value => value == null ? null : Url.Create(value.Value));
 
     public static readonly ValueConverter<ViewPreferences, string?> ViewPreferencesConverter = new(

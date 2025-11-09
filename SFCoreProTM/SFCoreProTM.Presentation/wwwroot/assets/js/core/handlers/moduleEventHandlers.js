@@ -86,6 +86,7 @@ async function handleEditModule(moduleId) {
                 bootstrap.Modal.getInstance(modalElement).hide();
                 showNotification('Module updated successfully.', 'success');
                 handleLoadModules(modulesList);
+                sfcoreStorage.remove('inisiateTaskUser');
             } catch (error) {
                 showNotification(`Error updating module: ${error.message}`, 'danger');
             }
@@ -115,6 +116,8 @@ async function handleDeleteModule(moduleId) {
             await deleteModule(projectId, moduleId);
             showNotification('Module deleted successfully.', 'success');
             handleLoadModules(modulesList);
+            sfcoreStorage.remove('inisiateTaskUser');
+
         }
     } catch (error) {
         showNotification(`Error deleting module: ${error.message}`, 'danger');
@@ -171,6 +174,8 @@ export function initializeCreateModuleButton() {
                     bootstrap.Modal.getInstance(modalElement).hide();
                     showNotification('Module created successfully.', 'success');
                     handleLoadModules(modulesList);
+                    sfcoreStorage.remove('inisiateTaskUser');
+
                 } catch (error) {
                     showNotification(`Error creating module: ${error.message}`, 'danger');
                 }

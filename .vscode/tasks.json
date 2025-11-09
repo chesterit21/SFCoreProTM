@@ -1,0 +1,46 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "build",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "build",
+                "${workspaceFolder}/SFCoreProTM/SFCoreProTM.Presentation/SFCoreProTM.Presentation.csproj"
+            ],
+            "problemMatcher": "$msCompile",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        }
+        // ,
+        // {
+        //     "label": "build-agent-api",
+        //     "command": "dotnet",
+        //     "type": "process",
+        //     "args": [
+        //         "build",
+        //         "${workspaceFolder}/SFCore.AgentWorkflow/SFCore.AgentWorkflow.API/SFCore.AgentWorkflow.API.csproj"
+        //     ],
+        //     "problemMatcher": "$msCompile",
+        //     "group": "build"
+        // }
+        // ,
+        // {
+        //     "label": "watch",
+        //     "command": "dotnet",
+        //     "type": "process",
+        //     "args": [
+        //         "watch",
+        //         "run",
+        //         "--project",
+        //         "${workspaceFolder}/SFCoreProTM/SFCoreProTM.Presentation/SFCoreProTM.Presentation.csproj"
+        //     ],
+        //     "problemMatcher": "$msCompile",
+        //     "group": "build",
+        //     "isBackground": true
+        // }
+    ]
+}

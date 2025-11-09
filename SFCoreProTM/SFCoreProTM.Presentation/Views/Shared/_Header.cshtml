@@ -66,12 +66,14 @@
                     <input class="form-control form-control-sm border-0 bg-transparent shadow-none" type="search" placeholder="Cari proyek atau tugas" aria-label="Search" style="color: rgba(248, 250, 252, 0.78); width: 180px;">
                 </div>
             </form>
-            <a type="button" asp-controller="ProjectsMenu" asp-action="Index" class="btn btn-sm me-3 fw-semibold shadow-sm" style="background-color: #222220; border-radius: 12px;color:rgb(231, 231, 231);padding-left:8px;padding-right:8px;">
-                Proyek
-            </a>
-            <a type="button" asp-controller="ProjectsMenu" asp-action="Create" class="btn btn-sm me-3 fw-semibold text-dark shadow-sm" style="background-color: #facc15; border-radius: 12px;">
+            <a type="button" asp-controller="ProjectsMenu" asp-action="Create" class="btn btn-sm me-3 fw-semibold text-dark shadow-sm" style="background-color: #facc15;">
                 Buat Proyek
             </a>
+
+            <button type="button" id="sfcore-ai-chat-btn" class="btn btn-sm btn-outline-light me-3 fw-semibold d-flex align-items-center">
+                <i class="fa-solid fa-spray-can-sparkles"></i> SFCore AI <i class="fa-brands fa-staylinked"></i>
+            </button>
+
             <div class="dropdown">
                 <button class="btn dropdown-toggle d-flex align-items-center justify-content-center fw-bold" 
                         style="width: 40px; height: 40px; border-radius: 12px; background: rgba(15, 23, 42, 0.25);"

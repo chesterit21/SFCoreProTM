@@ -406,3 +406,220 @@ nav.navbar {
   gap: 0.5rem;
   min-width: 14rem;
 }
+
+/* Chat Panel Styles */
+.chat-panel {
+    position: fixed;
+    top: 0;
+    right: -660px;
+    width: 650px;
+    height: 100vh;
+    background-color: #fff;
+    box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);
+    z-index: 1050;
+    display: flex;
+    flex-direction: column;
+    transition: right 0.3s ease-in-out;
+    font-size: 1.15rem;
+}
+
+.chat-panel.open {
+    right: 0;
+}
+
+.chat-panel-header {
+    padding: 10px 15px;
+    background: linear-gradient(45deg, blue, crimson, purple, rgb(124, 48, 211));
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.chat-panel-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.chat-mode-selector {
+    padding: 8px 12px;
+    border: 1px solid #7b26a3;
+    background-color: #f8f9fa;
+    font-size: 0.8rem;
+}
+
+.chat-messages {
+    flex: 1;
+    padding: 10px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.chat-message {
+    max-width: 95%;
+    padding: 8px 12px;
+    border-radius: 15px;
+    position: relative;
+    animation: fadeIn 0.2s ease-in-out;
+    font-size: 0.95rem;
+    line-height: 1.4;
+}
+
+.chat-message.user {
+    align-self: flex-end;
+    background-color: #54198f;
+    color: white;
+    border-bottom-right-radius: 5px;
+}
+
+.chat-message.ai {
+    align-self: flex-start;
+    background-color: #ffffff;
+    color: #800d9c;
+    border-bottom-left-radius: 5px;
+}
+
+.chat-message.error {
+    align-self: flex-start;
+    background-color: #fee2e2;
+    color: #991b1b;
+    border-bottom-left-radius: 5px;    
+}
+
+.chat-input-area {
+    padding: 10px;
+    margin: 10px;
+    background-color: #ffffff;
+    position: relative;
+    border-radius: 10px;
+    overflow: hidden;
+    background: linear-gradient(white, white) padding-box, linear-gradient(to right, rgba(48, 48, 138, 0.247),crimson, darkorchid) border-box;
+    border: 2px solid transparent;
+    /* Menambahkan sedikit margin untuk memberi ruang pada efek glowing */
+    margin: 20px;
+}
+
+.chat-input-area::before {
+    content: '';
+    position: absolute;
+
+    background: linear-gradient(45deg, blue, crimson, purple, pink);
+    border-radius: 10px;
+    z-index: -1;
+    animation: glowing-border 3s linear infinite;
+    background-size: 300% 300%;
+}
+
+.chat-input-area::after {
+    content: '';
+    position: absolute;
+    border-radius: 10px;
+    z-index: -2;
+    box-shadow: 0 0 20px rgba(128, 0, 128, 0.8);
+}
+
+@keyframes glowing-border {
+    0% {
+        background-position: 0% 50%;
+        filter: blur(3px);
+    }
+    25% {
+        background-position: 50% 50%;
+        filter: blur(4px);
+    }
+    50% {
+        background-position: 100% 50%;
+        filter: blur(3px);
+    }
+    75% {
+        background-position: 50% 50%;
+        filter: blur(4px);
+    }
+    100% {
+        background-position: 0% 50%;
+        filter: blur(3px);
+    }
+}
+
+.chat-input-area .input-group {
+    border: none;
+    background: transparent;
+    margin-bottom: 10px;
+}
+
+.chat-input-area textarea.form-control {
+    border: none;
+    background: transparent;
+    box-shadow: none;
+    resize: none;
+    padding: 10px 15px;
+}
+
+.chat-input-area-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 10px;
+}
+
+.chat-input-area select#chatMode {
+    border: none;
+    background: transparent;
+}
+
+.chat-input-area button#sendChatMessage {
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: none;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 576px) {
+    .chat-panel {
+        width: 100%;
+        right: -100%;
+    }
+}
+
+.thinking-container {
+    margin: 5px 0;
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+.thinking-header {
+    cursor: pointer;
+    background-color: #e9ecef;
+    padding: 5px 10px;
+    border-radius: 3px;
+    margin-top: 5px;
+    font-size: 0.75rem;
+    display: flex;
+    align-items: center;
+}
+
+.thinking-header .toggle-icon {
+    transition: transform 0.1s;
+}
+
+.thinking-content {
+    padding: 10px 10px;
+    font-size: 0.95rem;
+    background: linear-gradient(white,white) padding-box, linear-gradient(to right, rgba(255, 31, 180, 0.247),rgb(90, 20, 220), rgb(35, 204, 247)) border-box;
+    border: 2px solid transparent;
+    border-radius: 10px;
+}

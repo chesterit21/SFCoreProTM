@@ -27,45 +27,45 @@ public class CurrentUserService : ICurrentUserService
     {
         get
         {
-            _logger.LogInformation("Mengambil UserId dari klaim");
-            _logger.LogInformation("HttpContext tersedia: {HttpContextAvailable}", _httpContextAccessor.HttpContext != null);
+            //_logger.LogInformation("Mengambil UserId dari klaim");
+            //_logger.LogInformation("HttpContext tersedia: {HttpContextAvailable}", _httpContextAccessor.HttpContext != null);
             
-            if (_httpContextAccessor.HttpContext != null)
-            {
-                _logger.LogInformation("User tersedia: {UserAvailable}", _httpContextAccessor.HttpContext.User != null);
-                _logger.LogInformation("Identitas terautentikasi: {IsAuthenticated}", _httpContextAccessor.HttpContext.User?.Identity?.IsAuthenticated);
+            // if (_httpContextAccessor.HttpContext != null)
+            // {
+            //     //_logger.LogInformation("User tersedia: {UserAvailable}", _httpContextAccessor.HttpContext.User != null);
+            //     //_logger.LogInformation("Identitas terautentikasi: {IsAuthenticated}", _httpContextAccessor.HttpContext.User?.Identity?.IsAuthenticated);
                 
-                if (_httpContextAccessor.HttpContext.User?.Identity?.IsAuthenticated == true)
-                {
-                    _logger.LogInformation("Jumlah klaim: {ClaimCount}", _httpContextAccessor.HttpContext.User?.Claims?.Count());
-                    foreach (var claim in _httpContextAccessor.HttpContext.User?.Claims ?? new System.Collections.Generic.List<Claim>())
-                    {
-                        _logger.LogInformation("Klaim: {ClaimType} = {ClaimValue}", claim.Type, claim.Value);
-                    }
-                }
-            }
+            //     // if (_httpContextAccessor.HttpContext.User?.Identity?.IsAuthenticated == true)
+            //     // {
+            //     //     //_logger.LogInformation("Jumlah klaim: {ClaimCount}", _httpContextAccessor.HttpContext.User?.Claims?.Count());
+            //     //     foreach (var claim in _httpContextAccessor.HttpContext.User?.Claims ?? new System.Collections.Generic.List<Claim>())
+            //     //     {
+            //     //         _logger.LogInformation("Klaim: {ClaimType} = {ClaimValue}", claim.Type, claim.Value);
+            //     //     }
+            //     // }
+            // }
             
             // .NET secara otomatis memetakan klaim "sub" ke "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"
             var sub = _httpContextAccessor.HttpContext?.User?.FindFirstValue("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier");
-            _logger.LogInformation("Nilai klaim 'sub' (dari nameidentifier): {SubValue}", sub);
+            //_logger.LogInformation("Nilai klaim 'sub' (dari nameidentifier): {SubValue}", sub);
             
             if (Guid.TryParse(sub, out var id))
             {
-                _logger.LogInformation("UserId berhasil di-parse: {UserId}", id);
+                //_logger.LogInformation("UserId berhasil di-parse: {UserId}", id);
                 return id;
             }
             
             // Fallback ke pencarian klaim "sub" langsung
             var directSub = _httpContextAccessor.HttpContext?.User?.FindFirstValue("sub");
-            _logger.LogInformation("Nilai klaim 'sub' (langsung): {DirectSubValue}", directSub);
+            //_logger.LogInformation("Nilai klaim 'sub' (langsung): {DirectSubValue}", directSub);
             
             if (Guid.TryParse(directSub, out var directId))
             {
-                _logger.LogInformation("UserId berhasil di-parse (langsung): {UserId}", directId);
+                //_logger.LogInformation("UserId berhasil di-parse (langsung): {UserId}", directId);
                 return directId;
             }
             
-            _logger.LogWarning("Gagal mem-parsing UserId dari klaim 'sub'");
+            //_logger.LogWarning("Gagal mem-parsing UserId dari klaim 'sub'");
             return null;
         }
     }
@@ -77,17 +77,17 @@ public class CurrentUserService : ICurrentUserService
     {
         get
         {
-            _logger.LogInformation("Mengambil WorkspaceId dari klaim");
+            //_logger.LogInformation("Mengambil WorkspaceId dari klaim");
             var workspaceId = _httpContextAccessor.HttpContext?.User?.FindFirstValue("workspace_id");
-            _logger.LogInformation("Nilai klaim 'workspace_id': {WorkspaceIdValue}", workspaceId);
+            //_logger.LogInformation("Nilai klaim 'workspace_id': {WorkspaceIdValue}", workspaceId);
             
             if (Guid.TryParse(workspaceId, out var id))
             {
-                _logger.LogInformation("WorkspaceId berhasil di-parse: {WorkspaceId}", id);
+                //_logger.LogInformation("WorkspaceId berhasil di-parse: {WorkspaceId}", id);
                 return id;
             }
             
-            _logger.LogWarning("Gagal mem-parsing WorkspaceId dari klaim 'workspace_id'");
+            //_logger.LogWarning("Gagal mem-parsing WorkspaceId dari klaim 'workspace_id'");
             return null;
         }
     }
